@@ -1,0 +1,131 @@
+/*
+|--------------------------------------------------------------------------
+| 1. Laravel Debugbar
+|--------------------------------------------------------------------------
+| https://github.com/barryvdh/laravel-debugbar
+*/
+
+# Composer
+composer require barryvdh/laravel-debugbar --dev
+
+# bootstrap/providers.php
+Barryvdh\Debugbar\ServiceProvider::class
+
+# app/Providers/AppServiceProvider.php
+public function register(): void
+{
+    $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+    $loader->alias('Debugbar', \Barryvdh\Debugbar\Facades\Debugbar::class);
+}
+
+# Publish config / assets
+php artisan vendor:publish --provider="Barryvdh\Debugbar\ServiceProvider"
+
+
+/*
+|--------------------------------------------------------------------------
+| 2. Yajra Datatables
+|--------------------------------------------------------------------------
+*/
+
+# Composer
+composer require yajra/laravel-datatables-oracle:"^12.0"
+composer require yajra/laravel-datatables:"^12.0"
+composer require yajra/laravel-datatables-buttons
+
+# bootstrap/providers.php
+Yajra\DataTables\DataTablesServiceProvider::class
+
+# Publish config / assets
+php artisan vendor:publish --provider="Yajra\DataTables\DataTablesServiceProvider"
+php artisan vendor:publish --provider="Yajra\DataTables\ButtonsServiceProvider"
+php artisan vendor:publish --tag=datatables
+php artisan vendor:publish --tag=datatables-buttons
+
+
+/*
+|--------------------------------------------------------------------------
+| 3. Maatwebsite Excel
+|--------------------------------------------------------------------------
+*/
+
+# Composer
+composer require maatwebsite/excel
+
+# bootstrap/providers.php
+Maatwebsite\Excel\ExcelServiceProvider::class
+
+# Publish config
+php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider" --tag=config
+
+
+/*
+|--------------------------------------------------------------------------
+| 4. PDF (Dompdf)
+|--------------------------------------------------------------------------
+*/
+
+# Composer
+composer require barryvdh/laravel-dompdf
+
+# bootstrap/providers.php
+Barryvdh\DomPDF\ServiceProvider::class
+
+# Publish config
+php artisan vendor:publish --provider="Barryvdh\DomPDF\ServiceProvider"
+
+
+/*
+|--------------------------------------------------------------------------
+| 5. Telescope (optional)
+|--------------------------------------------------------------------------
+*/
+
+# Composer
+composer require laravel/telescope
+
+# Cài đặt Telescope
+php artisan telescope:install
+php artisan migrate
+
+# Publish config / assets
+php artisan vendor:publish --provider="Laravel\Telescope\TelescopeServiceProvider"
+
+
+/*
+|--------------------------------------------------------------------------
+| 6. Spatie Packages
+|--------------------------------------------------------------------------
+*/
+
+# Roles & Permission
+composer require spatie/laravel-permission
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+
+# Activity Log
+composer require spatie/laravel-activitylog
+php artisan vendor:publish --provider="Spatie\Activitylog\ActivitylogServiceProvider"
+
+
+/*
+|--------------------------------------------------------------------------
+| 7. Sanctum
+|--------------------------------------------------------------------------
+*/
+
+# API token & SPA auth
+composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+
+
+/*
+|--------------------------------------------------------------------------
+| 8. CORS Middleware
+|--------------------------------------------------------------------------
+*/
+
+# Fruitcake CORS
+composer require fruitcake/laravel-cors
+
+# Publish config
+php artisan vendor:publish --provider="Fruitcake\Cors\CorsServiceProvider"
