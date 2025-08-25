@@ -3,7 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\UserInformation;
+use App\Models\OtpCode;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +14,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory()
+            ->count(20)
+            ->has(UserInformation::factory())
+            ->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        OtpCode::factory()
+            ->count(5)
+            ->create();
+
+        User::factory()
+            ->has(UserInformation::factory([
+                'first_name' => 'Khoa',
+                'last_name' => 'Nguyễn',
+                'full_name' => 'Admin',
+                'city' => 'Sài Gòn',
+                'state' => 'Sài Gòn',
+            ]))
+            ->create([
+                'username' => 'admin',
+                'email' => 'admin@gmail.com',
+                'phone' => '0935769312',
+                'role' => 'admin',
+                'password' => bcrypt('password'),
+            ]);
     }
 }
