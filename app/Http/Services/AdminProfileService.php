@@ -19,21 +19,24 @@ class AdminProfileService
         DB::beginTransaction();
 
         try {
-            $user->name = $data['name'] ?? $user->name;
+            $user->username = $data['username'] ?? $user->username;
             $user->first_name = $data['first_name'] ?? $user->first_name;
             $user->last_name = $data['last_name'] ?? $user->last_name;
             $user->phone = $data['phone'] ?? $user->phone;
             $user->link_social = $data['link_social'] ?? $user->link_social;
+            $user->gender = $data['gender'] ?? $user->gender;  
+            $user->dob = $data['dob'] ?? $user->dob; 
+            $user->full_name = $data['full_name'] ?? $user->full_name;
 
             // Handle photo
             if ($removeCurrentPhoto) {
                 $this->deletePhoto($user);
-                $user->photo = null;
-            }
+                $user->avatar_url = null;
+            }   
 
             if ($photo && $photo->isValid()) {
                 $this->deletePhoto($user);
-                $user->photo = $this->uploadPhoto($photo);
+                $user->avatar_url = $this->uploadPhoto($photo);
             }
 
             $user->save();
