@@ -22,11 +22,11 @@ class AdminRoleMiddleware
             return redirect()->route('login');
         }
 
-        if (Str::lower($user->group_role) !== Str::lower($requiredRole)) {
+        if (Str::lower($user->role) !== Str::lower($requiredRole)) {
             abort(403, 'Tài khoản không có quyền truy cập');
         }
 
-        if ($user->is_active !== 'active') {
+        if ($user->status !== 'active') {
             abort(403, 'Tài khoản không hoạt động');
         }
 

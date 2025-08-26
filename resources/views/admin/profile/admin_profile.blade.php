@@ -4,7 +4,7 @@
 
 @section('admin-content')
 
-    <h2 class="section-title">Hello, {{ Auth::user()->name }}!</h2>
+    <h2 class="section-title">Hello, {{ Auth::user()->username }}!</h2>
     <p class="section-lead">Update your personal information below.</p>
 
     <div class="row mt-4">

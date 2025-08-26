@@ -40,8 +40,8 @@
 
             const applyWidgetData = (data) => {
                 if (!data) return;
-                $profileAvatar.attr('src', data.photo_url || defaultAvatar);
-                $('#profileName').text(data.name);
+                $profileAvatar.attr('src', data.avatar_url || defaultAvatar);
+                $('#profileName').text(data.username);
                 $('#profilePhone').text(data.phone || '-');
                 if (data.link_social) {
                     $('#profileSocial').text(data.link_social).attr('href', data.link_social);
@@ -126,7 +126,7 @@
                         _token: '{{ csrf_token() }}'
                     }).done(res => {
                         if (res.status === 'success') {
-                            const src = res.photo || defaultAvatar;
+                            const src = res.avatar_url || defaultAvatar;
                             $previewForm.attr('src', src);
                             $profileAvatar.attr('src', src);
                             $('#previewAvatar').attr('src', src); 
