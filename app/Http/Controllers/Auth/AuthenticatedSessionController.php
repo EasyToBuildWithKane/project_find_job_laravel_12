@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('')
+            return redirect()->route('admin.dashboard')
                 ->with('error', 'Bạn không có quyền truy cập hệ thống quản trị.');
 
         }
@@ -55,7 +55,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('')
+            return redirect()->route('admin.dashboard')
                 ->with('error', 'Tài khoản của bạn hiện tại đang bị khóa.');
 
         }
@@ -65,7 +65,7 @@ class AuthenticatedSessionController extends Controller
             'last_login_ip' => $request->ip(),
         ]);
 
-        return redirect()->intended(route(''))
+        return redirect()->route('admin.dashboard')
             ->with('message', 'Đăng nhập thành công!');
     }
 

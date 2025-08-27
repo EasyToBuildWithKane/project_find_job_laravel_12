@@ -11,10 +11,10 @@
         <li class="dropdown">
             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                 <img alt="avatar"
-                    src="{{ Auth::user()->photo ? asset('uploads/admin_images/' . Auth::user()->photo) : asset('assets/img/avatar/avatar-1.png') }}"
+                    src="{{ Auth::user()->avatar_url ? asset('uploads/images/' . Auth::user()->avatar_url) : asset('assets/img/avatar/avatar-1.png') }}"
                     class="rounded-circle mr-1">
                 <div class="d-sm-none d-lg-inline-block">
-                    Hello, {{ Auth::user()->name ?? 'Guest' }}
+                    Hello, {{ Auth::user()->username ?? 'Guest' }}
                 </div>
             </a>
             <div class="dropdown-menu dropdown-menu-right">

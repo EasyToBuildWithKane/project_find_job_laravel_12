@@ -1,84 +1,50 @@
 <?php
 
 namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ */
+class UserFactory extends Factory
 {
-    public function run(): void
+    public function definition(): array
     {
-        $now = Carbon::now();
+        // Danh sách tên Việt Nam
+        $firstNames = ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Dang', 'Bui', 'Do', 'Vu', 'Ngo'];
+        $lastNames = ['An', 'Binh', 'Cuong', 'Dung', 'Hanh', 'Hieu', 'Khanh', 'Lan', 'Linh', 'Minh', 'Nam', 'Ngoc', 'Phong', 'Quang', 'Son', 'Thao', 'Trang', 'Tuan', 'Vy'];
 
-        $users = [
-            [
-                'username' => 'admin_master',
-                'email' => 'admin@gmail.com',
-                'phone' => '0909123456',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'status' => 'active',
-                'first_name' => 'Quản',
-                'last_name' => 'Trị',
-                'full_name' => 'Quản Trị Viên',
-                'gender' => 'male',
-                'dob' => '1990-01-01',
-                'city' => 'Hà Nội',
-                'country_code' => 'VN',
-                'language' => 'vi',
-                'timezone' => 'Asia/Ho_Chi_Minh',
-                'avatar_url' => '/images/users/admin.png',
-                'marketing_opt_in' => true,
-                'privacy_policy_accepted_at' => $now,
-                'terms_accepted_at' => $now,
-                'last_password_change_at' => $now,
-            ],
-            [
-                'username' => 'freelancer_hung',
-                'email' => 'hung.freelancer@gmail.com',
-                'phone' => '0909555123',
-                'password' => Hash::make('password'),
-                'role' => 'freelancer',
-                'status' => 'active',
-                'first_name' => 'Hùng',
-                'last_name' => 'Nguyễn',
-                'full_name' => 'Nguyễn Văn Hùng',
-                'gender' => 'male',
-                'dob' => '1995-04-15',
-                'city' => 'Hồ Chí Minh',
-                'country_code' => 'VN',
-                'language' => 'vi',
-                'timezone' => 'Asia/Ho_Chi_Minh',
-                'avatar_url' => '/images/users/hung.png',
-                'marketing_opt_in' => false,
-                'privacy_policy_accepted_at' => $now,
-                'terms_accepted_at' => $now,
-            ],
-            [
-                'username' => 'employer_anhthu',
-                'email' => 'anhthu.employer@gmail.com',
-                'phone' => '0912345678',
-                'password' => Hash::make('password'),
-                'role' => 'employer',
-                'status' => 'active',
-                'first_name' => 'Anh',
-                'last_name' => 'Thư',
-                'full_name' => 'Lê Anh Thư',
-                'gender' => 'female',
-                'dob' => '1988-12-05',
-                'city' => 'Đà Nẵng',
-                'country_code' => 'VN',
-                'language' => 'vi',
-                'timezone' => 'Asia/Ho_Chi_Minh',
-                'avatar_url' => '/images/users/anhthu.png',
-                'marketing_opt_in' => true,
-                'privacy_policy_accepted_at' => $now,
-                'terms_accepted_at' => $now,
-            ],
+        $firstName = $this->faker->randomElement($firstNames);
+        $lastName = $this->faker->randomElement($lastNames);
+        $fullName = $firstName . ' ' . $lastName;
+
+        // Email @gmail.com
+        $email = Str::slug($fullName, '') . $this->faker->numberBetween(100, 999) . '@gmail.com';
+
+        // SĐT Việt Nam
+        $prefixes = ['03', '05', '07', '08', '09'];
+        $phone = $this->faker->randomElement($prefixes) . $this->faker->numerify('########');
+
+        return [
+            'id' => $this->faker->randomNumber(9),
+
+            'username' => Str::lower(Str::slug($fullName, '')) . $this->faker->numberBetween(1, 999),
+            'email' => $email,
+            'phone' => $phone,
+            'password' => Hash::make('123456'), // mật khẩu mặc định
+            'role' => $this->faker->randomElement(['freelancer', 'employer']),
+            'status' => 'active',
+
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'full_name' => $fullName,
+            'dob' => $this->faker->dateTimeBetween('-40 years', '-18 years')->format('Y-m-d'),
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'city' => $this->faker->city,
+            'country_code' => 'VN',
+            'language' => 'vi',
         ];
 
         foreach ($users as $data) {
