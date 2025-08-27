@@ -1,7 +1,6 @@
 <?php
 
-namespace Database\Factories;
-
+namespace Database\Seeders;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -47,5 +46,12 @@ class UserFactory extends Factory
             'country_code' => 'VN',
             'language' => 'vi',
         ];
+
+        foreach ($users as $data) {
+            User::updateOrCreate(
+                ['username' => $data['username']],
+                $data
+            );
+        }
     }
 }
