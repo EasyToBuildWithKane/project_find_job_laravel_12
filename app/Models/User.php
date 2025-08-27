@@ -14,40 +14,9 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasUuids;
 
-    /**
-     * Tên bảng DB.
-     *
-     * @var string
-     */
-    protected $table = 'users';
-
-    /**
-     * Khóa chính.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * Kiểu khóa chính.
-     *
-     * @var string
-     */
-    protected $keyType = 'int';
-
-    /**
-     * Tự động tăng.
-     *
-     * @var bool
-     */
-    public $incrementing = true;
-
-    /**
-     * Các field có thể gán giá trị (Mass Assignment).
-     *
-     * @var array<int, string>
-     */
+   
     protected $fillable = [
+        'id',
         'username',
         'email',
         'phone',

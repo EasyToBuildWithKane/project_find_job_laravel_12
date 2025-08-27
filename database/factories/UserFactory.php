@@ -18,8 +18,9 @@ class UserFactory extends Factory
         $fullName = "$firstName $lastName";
 
         return [
+            'id' => random_int(1, 99999), // không cần set id
             'username' => Str::lower(Str::slug($fullName)) . $this->faker->unique()->numberBetween(1, 999),
-            'email' => Str::slug($fullName) . $this->faker->unique()->numberBetween(100, 999) . '@gmail.com',
+            'email' => Str::lower(Str::slug($fullName)) . $this->faker->unique()->numberBetween(100, 999) . '@gmail.com',
             'phone' => $this->faker->randomElement(['03', '05', '07', '08', '09']) . $this->faker->numerify('########'),
             'password' => Hash::make('123456'),
             'role' => $this->faker->randomElement(['freelancer', 'employer']),

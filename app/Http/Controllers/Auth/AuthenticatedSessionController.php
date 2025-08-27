@@ -35,17 +35,14 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->where('id', '!=', $request->session()->getId())
-            ->delete();
+        
 
         if ($user->role !== 'admin') {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('admin.dashboard')
+            return redirect()->route('homepage')
                 ->with('error', 'Bạn không có quyền truy cập hệ thống quản trị.');
 
         }
@@ -55,7 +52,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('admin.dashboard')
+            return redirect()->route('homepage')
                 ->with('error', 'Tài khoản của bạn hiện tại đang bị khóa.');
 
         }
@@ -65,7 +62,7 @@ class AuthenticatedSessionController extends Controller
             'last_login_ip' => $request->ip(),
         ]);
 
-        return redirect()->route('admin.dashboard')
+        return redirect()->intended(route('admin.dashboard'))
             ->with('message', 'Đăng nhập thành công!');
     }
 

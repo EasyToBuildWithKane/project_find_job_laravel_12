@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        $this->call([
-            CompanyProfileSeeder::class,
-            CompanyTeamMemberSeeder::class,
-        ]);
+        // $this->call([
+        //     CompanyProfileSeeder::class,
+        //     CompanyTeamMemberSeeder::class,
+        // ]);
 
        User::factory()->count(10)->create();
 

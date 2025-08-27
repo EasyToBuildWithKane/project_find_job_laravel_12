@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 // ===== ADMIN / PROTECTED =====
 
-Route::middleware(['auth', 'role:admin', 'auth.session'])
+Route::middleware( ['auth.session'])
     ->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'AdminDashboard'])
