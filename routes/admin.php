@@ -4,8 +4,9 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-// Nhóm middleware cho admin
-Route::middleware(['auth', 'role:Admin', 'auth.session'])
+// ===== ADMIN / PROTECTED =====
+
+Route::middleware(['auth', 'role:admin', 'auth.session'])
     ->group(function () {
 
         // Dashboard

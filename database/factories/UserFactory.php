@@ -1,39 +1,91 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
+use App\Models\User;
 
-class UserFactory extends Factory
+class UserSeeder extends Seeder
 {
-    protected $model = User::class;
-
-    public function definition(): array
+    public function run(): void
     {
-        return [
-            'uuid' => $this->faker->uuid(),
-            'username' => $this->faker->unique()->userName(),
-            'email' => $this->faker->unique()->userName() . '@gmail.com',
-            'phone' => '0' . $this->faker->numerify('9########'),
-            'password' => Hash::make('password'),
-            'role' => $this->faker->randomElement(['freelancer', 'employer']),
-            'status' => 'active',
+        $now = Carbon::now();
 
-            'email_verified_at' => now(),
-            'phone_verified_at' => $this->faker->optional()->dateTime(),
-
-            'last_login_ip' => $this->faker->ipv4(),
-            'last_login_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
-
-            'two_factor_enabled' => false,
-            'two_factor_secret' => null,
-
-            'failed_login_attempts' => 0,
-            'last_failed_login_at' => null,
-            'remember_token' => Str::random(10),
+        $users = [
+            [
+                'username' => 'admin_master',
+                'email' => 'admin@gmail.com',
+                'phone' => '0909123456',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'status' => 'active',
+                'first_name' => 'Quản',
+                'last_name' => 'Trị',
+                'full_name' => 'Quản Trị Viên',
+                'gender' => 'male',
+                'dob' => '1990-01-01',
+                'city' => 'Hà Nội',
+                'country_code' => 'VN',
+                'language' => 'vi',
+                'timezone' => 'Asia/Ho_Chi_Minh',
+                'avatar_url' => '/images/users/admin.png',
+                'marketing_opt_in' => true,
+                'privacy_policy_accepted_at' => $now,
+                'terms_accepted_at' => $now,
+                'last_password_change_at' => $now,
+            ],
+            [
+                'username' => 'freelancer_hung',
+                'email' => 'hung.freelancer@gmail.com',
+                'phone' => '0909555123',
+                'password' => Hash::make('password'),
+                'role' => 'freelancer',
+                'status' => 'active',
+                'first_name' => 'Hùng',
+                'last_name' => 'Nguyễn',
+                'full_name' => 'Nguyễn Văn Hùng',
+                'gender' => 'male',
+                'dob' => '1995-04-15',
+                'city' => 'Hồ Chí Minh',
+                'country_code' => 'VN',
+                'language' => 'vi',
+                'timezone' => 'Asia/Ho_Chi_Minh',
+                'avatar_url' => '/images/users/hung.png',
+                'marketing_opt_in' => false,
+                'privacy_policy_accepted_at' => $now,
+                'terms_accepted_at' => $now,
+            ],
+            [
+                'username' => 'employer_anhthu',
+                'email' => 'anhthu.employer@gmail.com',
+                'phone' => '0912345678',
+                'password' => Hash::make('password'),
+                'role' => 'employer',
+                'status' => 'active',
+                'first_name' => 'Anh',
+                'last_name' => 'Thư',
+                'full_name' => 'Lê Anh Thư',
+                'gender' => 'female',
+                'dob' => '1988-12-05',
+                'city' => 'Đà Nẵng',
+                'country_code' => 'VN',
+                'language' => 'vi',
+                'timezone' => 'Asia/Ho_Chi_Minh',
+                'avatar_url' => '/images/users/anhthu.png',
+                'marketing_opt_in' => true,
+                'privacy_policy_accepted_at' => $now,
+                'terms_accepted_at' => $now,
+            ],
         ];
+
+        foreach ($users as $data) {
+            User::updateOrCreate(
+                ['username' => $data['username']],
+                $data
+            );
+        }
     }
 }

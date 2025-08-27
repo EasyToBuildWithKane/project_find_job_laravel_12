@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
             ->where('id', '!=', $request->session()->getId())
             ->delete();
 
-        if ($user->role !== 'Admin') {
+        if ($user->role !== 'admin') {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -50,7 +50,7 @@ class AuthenticatedSessionController extends Controller
 
         }
 
-        if ($user->is_active !== 'active') {
+        if ($user->status !== 'active') {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
