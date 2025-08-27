@@ -35,7 +35,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        
+        DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $request->session()->getId())
+            ->delete();
 
         if ($user->role !== 'admin') {
             Auth::logout();

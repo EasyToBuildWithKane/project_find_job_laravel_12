@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('admin.auth.login');
-});
+})->name('homepage');
 
 // Check client IP
 Route::get('/check-ip', function (\Illuminate\Http\Request $request) {
