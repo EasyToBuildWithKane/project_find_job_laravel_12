@@ -1,42 +1,29 @@
 <?php
 
-namespace Database\Seeders;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
+namespace Database\Factories;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
 class UserFactory extends Factory
 {
     public function definition(): array
     {
-        // Danh sách tên Việt Nam
         $firstNames = ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Dang', 'Bui', 'Do', 'Vu', 'Ngo'];
         $lastNames = ['An', 'Binh', 'Cuong', 'Dung', 'Hanh', 'Hieu', 'Khanh', 'Lan', 'Linh', 'Minh', 'Nam', 'Ngoc', 'Phong', 'Quang', 'Son', 'Thao', 'Trang', 'Tuan', 'Vy'];
 
         $firstName = $this->faker->randomElement($firstNames);
         $lastName = $this->faker->randomElement($lastNames);
-        $fullName = $firstName . ' ' . $lastName;
-
-        // Email @gmail.com
-        $email = Str::slug($fullName, '') . $this->faker->numberBetween(100, 999) . '@gmail.com';
-
-        // SĐT Việt Nam
-        $prefixes = ['03', '05', '07', '08', '09'];
-        $phone = $this->faker->randomElement($prefixes) . $this->faker->numerify('########');
+        $fullName = "$firstName $lastName";
 
         return [
-            'id' => $this->faker->randomNumber(9),
-
-            'username' => Str::lower(Str::slug($fullName, '')) . $this->faker->numberBetween(1, 999),
-            'email' => $email,
-            'phone' => $phone,
-            'password' => Hash::make('123456'), // mật khẩu mặc định
+            'username' => Str::lower(Str::slug($fullName)) . $this->faker->unique()->numberBetween(1, 999),
+            'email' => Str::slug($fullName) . $this->faker->unique()->numberBetween(100, 999) . '@gmail.com',
+            'phone' => $this->faker->randomElement(['03', '05', '07', '08', '09']) . $this->faker->numerify('########'),
+            'password' => Hash::make('123456'),
             'role' => $this->faker->randomElement(['freelancer', 'employer']),
             'status' => 'active',
-
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => $fullName,
@@ -46,12 +33,5 @@ class UserFactory extends Factory
             'country_code' => 'VN',
             'language' => 'vi',
         ];
-
-        foreach ($users as $data) {
-            User::updateOrCreate(
-                ['username' => $data['username']],
-                $data
-            );
-        }
     }
 }
