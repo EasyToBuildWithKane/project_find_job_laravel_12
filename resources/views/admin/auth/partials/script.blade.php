@@ -6,7 +6,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'success',
-                title: 'Logout Successful',
+                title: 'Đăng xuất thành công',
                 text: @json(session('success')),
                 confirmButtonText: 'OK'
             });
@@ -18,7 +18,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.querySelector('form');
         const loginBtn = document.getElementById('login-btn');
-        const originalText = loginBtn?.textContent || 'Submit';
+        const originalText = loginBtn?.textContent || 'Đăng nhập';
 
         const showAlert = (icon, title, text, timer = null) => {
             Swal.fire({
@@ -30,7 +30,7 @@
             });
         };
 
-        // ---------- Client-side Validation ----------
+        // ---------- Kiểm tra dữ liệu client ----------
         form?.addEventListener('submit', e => {
             const login = document.getElementById('login')?.value.trim();
             const password = document.getElementById('password')?.value.trim();
@@ -38,37 +38,37 @@
             if (!login || !password) {
                 e.preventDefault();
                 const msg = !login && !password ?
-                    'Please enter both username and password.' :
-                    !login ? 'Please enter your username.' : 'Please enter your password.';
-                showAlert('warning', 'Missing Information', msg);
+                    'Vui lòng nhập tên đăng nhập và mật khẩu.' :
+                    !login ? 'Vui lòng nhập tên đăng nhập.' : 'Vui lòng nhập mật khẩu.';
+                showAlert('warning', 'Thiếu thông tin', msg);
                 return;
             }
 
             loginBtn.disabled = true;
-            loginBtn.textContent = 'Logging in...';
+            loginBtn.textContent = 'Đang đăng nhập...';
         });
 
-        // ---------- Session Messages ----------
+        // ---------- Thông báo Session ----------
         @if (session('error'))
-            showAlert('error', 'Login Failed', @json(session('error')));
+            showAlert('error', 'Đăng nhập thất bại', @json(session('error')));
             loginBtn.disabled = false;
             loginBtn.textContent = originalText;
         @endif
 
         @if (session('message'))
-            showAlert('success', 'Success', @json(session('message')), 2000);
+            showAlert('success', 'Thành công', @json(session('message')), 2000);
         @endif
 
-        // ---------- Throttle / Countdown ----------
+        // ---------- Giới hạn / Đếm ngược ----------
         @if ($errors->has('throttle'))
             let countdown = {{ $errors->first('throttle') }};
             loginBtn.disabled = true;
 
             Swal.fire({
                 icon: 'error',
-                title: 'Too Many Login Attempts',
-                html: `You have entered incorrect credentials too many times.<br>
-                   Please try again in <b id="swal-countdown">${countdown}</b> seconds.`,
+                title: 'Quá nhiều lần thử đăng nhập',
+                html: `Bạn đã nhập sai thông tin quá nhiều lần.<br>
+                   Vui lòng thử lại sau <b id="swal-countdown">${countdown}</b> giây.`,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -76,7 +76,7 @@
                         countdown--;
                         document.getElementById('swal-countdown').textContent = countdown;
                         loginBtn.textContent =
-                        `Please try again in ${countdown} seconds...`;
+                        `Vui lòng thử lại sau ${countdown} giây...`;
 
                         if (countdown <= 0) {
                             clearInterval(interval);
