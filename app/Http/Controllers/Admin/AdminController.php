@@ -45,8 +45,8 @@ class AdminController extends Controller
         try {
             $user = $this->profileService->updateProfile(
                 Auth::user(),
-                $request->only(['name', 'first_name', 'last_name', 'phone', 'link_social']),
-                $request->file('photo'),
+                $request->only(['username', 'first_name', 'last_name', 'phone', 'link_social','gender','dob','full_name']),
+                $request->file('avatar_url'),
                 $request->boolean('remove_current_photo')
             );
 
@@ -54,10 +54,10 @@ class AdminController extends Controller
                 'status' => 'success',
                 'message' => 'Cập nhật thông tin cá nhân thành công.',
                 'data' => [
-                    'name' => $user->name,
+                    'username' => $user->username,
                     'phone' => $user->phone,
                     'link_social' => $user->link_social,
-                    'photo_url' => $user->photo ? asset('uploads/images/' . $user->photo) : asset('uploads/no_image.jpg'),
+                    'avatar_url' => $user->avatar_url ? asset('uploads/images/' . $user->avatar_url) : asset('uploads/no_image.jpg'),
                 ]
             ]);
 

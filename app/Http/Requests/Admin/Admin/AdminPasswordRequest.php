@@ -3,30 +3,46 @@
 namespace App\Http\Requests\Admin\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AdminPasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Chỉ cho phép user đã đăng nhập đổi mật khẩu
+        return Auth::check();
     }
 
     public function rules(): array
     {
         return [
-            'old_password' => 'required',
-            'new_password' => 'required|string|min:6|confirmed|different:old_password',
+            'old_password' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    // Kiểm tra mật khẩu cũ có khớp DB không
+                    if (!Hash::check($value, Auth::user()->password)) {
+                        $fail('Mật khẩu hiện tại không chính xác.');
+                    }
+                }
+            ],
+            'new_password' => 'required|string|min:6|max:32|confirmed|different:old_password',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'old_password.required' => 'Please enter your current password.',
-            'new_password.required' => 'Please enter a new password.',
-            'new_password.min' => 'The new password must be at least 6 characters.',
-            'new_password.confirmed' => 'Password confirmation does not match.',
-            'new_password.different' => 'The new password must be different from the old one.',
+            // Mật khẩu hiện tại
+            'old_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+
+            // Mật khẩu mới
+            'new_password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'new_password.string' => 'Mật khẩu mới phải là một chuỗi ký tự hợp lệ.',
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất :min ký tự.',
+            'new_password.max' => 'Mật khẩu mới không được vượt quá :max ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'new_password.different' => 'Mật khẩu mới phải khác mật khẩu hiện tại.',
         ];
     }
 }
