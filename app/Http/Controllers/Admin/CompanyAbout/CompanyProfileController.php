@@ -6,30 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CompanyAbout\CompanyProfile\UpdateRequest;
 use App\Models\CompanyProfile;
 use App\Services\Admin\CompanyAbout\CompanyProfileService;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
 class CompanyProfileController extends Controller
 {
-    protected CompanyProfileService $service;
+    public function __construct(
+        protected CompanyProfileService $service
+    ) {}
 
-    public function __construct(CompanyProfileService $service)
-    {
-        $this->service = $service;
-    }
-
+    /**
+     * Danh sách các section trong Company Profile.
+     */
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = CompanyProfile::query();
+            $query = CompanyProfile::select(['section_key', 'title', 'headline', 'updated_at']);
 
             return DataTables::of($query)
                 ->addIndexColumn()
-                ->addColumn('actions', function ($profile) {
-                    return '<button class="btn btn-sm btn-primary btn-edit" data-section="' . $profile->section_key . '">Edit</button>';
+                ->addColumn('actions', function (CompanyProfile $profile) {
+                    return view('admin.company_about.company_profile._action_buttons', compact('profile'))->render();
                 })
                 ->rawColumns(['actions'])
                 ->make(true);
@@ -37,37 +37,41 @@ class CompanyProfileController extends Controller
 
         return view('admin.company_about.company_profile.index');
     }
-    public function edit($sectionKey)
-    {
 
+    /**
+     * Render form chỉnh sửa section.
+     */
+    public function edit(string $sectionKey): JsonResponse
+    {
         $profile = CompanyProfile::where('section_key', $sectionKey)->firstOrFail();
-        return view('admin.company_about.company_profile._fields', compact('profile'));
+
+        $html = view('admin.company_about.company_profile._fields', compact('profile'))->render();
+
+        return response()->json(['html' => $html]);
     }
+
+    /**
+     * Cập nhật section.
+     */
     public function update(UpdateRequest $request, string $sectionKey): JsonResponse
     {
         try {
             $profile = $this->service->updateSection($sectionKey, $request->validated());
 
             return response()->json([
-                'icon' => 'success',
-                'title' => 'Cập nhật thành công',
-                'text' => "Section '{$sectionKey}' đã được cập nhật!",
+                'status' => 'success',
+                'message' => __("Section ':key' đã được cập nhật!", ['key' => $sectionKey]),
                 'data' => $profile,
             ]);
-        } catch (ValidationException $e) {
+        } catch (Throwable $e) {
+            report($e);
+
             return response()->json([
-                'icon' => 'error',
-                'title' => 'Lỗi validation',
-                'text' => $e->getMessage(),
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (Exception $e) {
-            return response()->json([
-                'icon' => 'error',
-                'title' => 'Cập nhật thất bại',
-                'text' => $e->getMessage(),
-            ], 422);
+                'status' => 'error',
+                'message' => app()->isLocal()
+                    ? $e->getMessage()
+                    : 'Có lỗi xảy ra, vui lòng thử lại.',
+            ], 500);
         }
     }
-
 }
