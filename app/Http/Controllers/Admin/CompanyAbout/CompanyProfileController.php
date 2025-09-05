@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\CompanyAbout;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\CompanyProfile\UpdateRequest;
+use App\Http\Requests\Admin\CompanyAbout\CompanyProfile\UpdateRequest;
 use App\Models\CompanyProfile;
 use App\Services\Admin\CompanyAbout\CompanyProfileService;
 use Exception;
@@ -37,6 +37,12 @@ class CompanyProfileController extends Controller
 
         return view('admin.company_about.company_profile.index');
     }
+    public function edit($sectionKey)
+    {
+
+        $profile = CompanyProfile::where('section_key', $sectionKey)->firstOrFail();
+        return view('admin.company_about.company_profile._fields', compact('profile'));
+    }
     public function update(UpdateRequest $request, string $sectionKey): JsonResponse
     {
         try {
@@ -63,4 +69,5 @@ class CompanyProfileController extends Controller
             ], 422);
         }
     }
+
 }

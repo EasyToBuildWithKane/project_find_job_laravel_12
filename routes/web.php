@@ -22,3 +22,4 @@ Route::get('/check-session', function () {
 })->name('check.session');
 
 require __DIR__.'/auth.php';
+
