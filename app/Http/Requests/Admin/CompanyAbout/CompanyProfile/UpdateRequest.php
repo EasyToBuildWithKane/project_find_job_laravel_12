@@ -14,14 +14,19 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Bỏ unique vì section_key lấy từ route, không từ form
             'headline' => 'nullable|string|max:150',
             'title' => 'required|string|max:200',
             'summary' => 'nullable|string|max:500',
             'body' => 'nullable|string',
-            'featured_image_url' => 'nullable|url|max:255',
+            'featured_image_url' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp,gif',
+                'max:2048',
+                'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000'
+            ],
             'cta_label' => 'nullable|string|max:100',
-            'cta_link' => 'nullable|url|max:255',
+
         ];
     }
 
@@ -33,8 +38,10 @@ class UpdateRequest extends FormRequest
             'title.max' => 'Tiêu đề chính không được vượt quá :max ký tự.',
             'headline.max' => 'Tiêu đề phụ không được vượt quá :max ký tự.',
             'summary.max' => 'Tóm tắt không được vượt quá :max ký tự.',
-            'featured_image_url.url' => 'URL ảnh nổi bật không hợp lệ.',
-            'cta_link.url' => 'Liên kết kêu gọi không hợp lệ.',
+            'featured_image_url.image' => 'Ảnh đại diện phải là một hình ảnh hợp lệ.',
+            'featured_image_url.mimes' => 'Ảnh đại diện chỉ được phép có định dạng: jpg, jpeg, png, webp, gif.',
+            'featured_image_url.max' => 'Ảnh đại diện không được vượt quá 2MB.',
+            'featured_image_url.dimensions' => 'Kích thước ảnh không hợp lệ. Yêu cầu tối thiểu 100x100 và tối đa 2000x2000.',
         ];
     }
 }

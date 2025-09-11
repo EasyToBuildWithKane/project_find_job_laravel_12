@@ -26,11 +26,10 @@ class UpdateRequest extends FormRequest
             'job_title' => 'required|string|max:150',
             'department' => 'nullable|string|max:100',
             'location' => 'nullable|string|max:100',
-            'profile_image_url' => 'nullable|url|max:255',
+            'profile_image_url' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'rating' => 'nullable|integer|min:1|max:5',
             'review_count' => 'nullable|integer|min:0',
-            'social_links' => 'nullable|array',
-            'social_links.*' => 'nullable|url',
+            'social_links' => 'nullable|json',
             'is_featured' => 'boolean',
             'display_order' => 'nullable|integer|min:0',
         ];

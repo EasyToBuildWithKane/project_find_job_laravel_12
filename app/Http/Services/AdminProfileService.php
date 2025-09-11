@@ -28,7 +28,6 @@ class AdminProfileService
             $user->dob = $data['dob'] ?? $user->dob; 
             $user->full_name = $data['full_name'] ?? $user->full_name;
 
-            // Handle photo
             if ($removeCurrentPhoto) {
                 $this->deletePhoto($user);
                 $user->avatar_url = null;

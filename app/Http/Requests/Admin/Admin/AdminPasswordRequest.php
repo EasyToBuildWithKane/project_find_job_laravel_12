@@ -20,7 +20,6 @@ class AdminPasswordRequest extends FormRequest
             'old_password' => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    // Kiểm tra mật khẩu cũ có khớp DB không
                     if (!Hash::check($value, Auth::user()->password)) {
                         $fail('Mật khẩu hiện tại không chính xác.');
                     }

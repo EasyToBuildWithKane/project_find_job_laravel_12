@@ -22,8 +22,8 @@
                     <i class="fas fa-puzzle-piece"></i> 
                     <span>Company About</span></a>
                 <ul class="dropdown-menu">
-                    <li><a href="{{ route('admin.company_about.index') }}">Our Company</a></li>
-                    <li><a href="#">Our Team</a></li>
+                    <li><a href="{{ route('admin.company_about.company_profile.index') }}">Our Company</a></li>
+                    <li><a href="{{ route('admin.company_about.company_team_member.index') }}">Our Team</a></li>
                 </ul>
             </li>
 
