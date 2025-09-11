@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CompanyAbout\CompanyProfileController;
+use App\Http\Controllers\Admin\CompanyAbout\CompanyTeamMemberController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -31,13 +32,24 @@ Route::middleware(['auth.session'])
         // Admin Company About
         // Company Profile
         Route::controller(CompanyProfileController::class)
-            ->prefix('company_about')
-            ->name('company_about.')
+            ->prefix('company_about/company_profile')
+            ->name('company_about.company_profile.')
             ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/{sectionKey}/edit', 'edit')->name('edit');
             Route::put('/{sectionKey}', 'update')->name('update');
         });
+
+        Route::controller(CompanyTeamMemberController::class)
+            ->prefix('company_about/company_team_member')
+            ->name('company_about.company_team_member.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}/remove-photo', 'removePhoto')
+                    ->name('remove-photo');
+            });
 
     });
 // Bao gồm routes auth mặc định
