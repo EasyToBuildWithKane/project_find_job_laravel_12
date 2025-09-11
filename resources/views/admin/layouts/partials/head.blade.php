@@ -7,6 +7,7 @@
  <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/stisla-fill.svg') }}">
  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
  <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+ <link rel="stylesheet" href="{{ asset('css/custom-datatables.css') }}">
  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-94034622-3"></script>
  <script type="text/javascript">
      window.dataLayer = window.dataLayer || [];

@@ -3,99 +3,128 @@
 namespace App\Http\Controllers\Admin\CompanyAbout;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CompanyAbout\CompanyTeamMember\UpdateRequest;
 use App\Models\CompanyTeamMember;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
 class CompanyTeamMemberController extends Controller
 {
+    /**
+     * Trang index + DataTables
+     */
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = CompanyTeamMember::select([
-                'id',
-                'full_name',
-                'job_title',
-                'department',
-                'location',
-                'profile_image_url',
-                'rating',
-                'review_count',
-                'social_links',
-                'is_featured',
-                'display_order',
-            ]);
+            $query = CompanyTeamMember::query();
 
             return DataTables::of($query)
-                ->addIndexColumn()
-                ->editColumn('profile_image_url', function (CompanyTeamMember $member) {
-                    if ($member->profile_image_url) {
-                        return '<img src="' . asset($member->profile_image_url) . '" 
-                            alt="Avatar" width="60" class="rounded-circle shadow">';
+                ->addColumn('action', function ($row) {
+                    $editUrl = route('admin.company_about.company_team_member.edit', $row->id);
+                    return '<a href="' . $editUrl . '" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Sửa
+                            </a>';
+                })
+                ->editColumn('profile_image_url', function ($row) {
+                    if ($row->profile_image_url) {
+                        return '<img src="' . asset($row->profile_image_url) . '" style="height:40px;width:auto;">';
                     }
-                    return '<span class="text-muted">No image</span>';
+                    return '-';
                 })
-                ->editColumn('is_featured', fn($row) => $row->is_featured ? '✅' : '❌')
-                ->addColumn('actions', function (CompanyTeamMember $row) {
-                    return view('admin.company_about.company_team_member._action_buttons', compact('row'))->render();
+                ->editColumn('is_featured', function ($row) {
+                    return $row->is_featured ? '<span class="badge bg-success">Nổi bật</span>' : '<span class="badge bg-secondary">Bình thường</span>';
                 })
-                ->rawColumns(['actions', 'profile_image_url'])
+                ->rawColumns(['action', 'profile_image_url', 'is_featured'])
                 ->make(true);
         }
 
         return view('admin.company_about.company_team_member.index');
     }
 
-    public function edit(int $id): JsonResponse
+    /**
+     * Trang edit
+     */
+    public function edit(int $id)
     {
-        $member = CompanyTeamMember::findOrFail($id);
-        $html = view('admin.company_about.company_team_member.fields', compact('member'))->render();
+        try {
+            $member = CompanyTeamMember::findOrFail($id);
+            return view('admin.company_about.company_team_member.edit', compact('member'));
+        } catch (Throwable $e) {
+            Log::error('CompanyTeamMember edit error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
-        return response()->json(['html' => $html]);
+            return redirect()->route('admin.company_about.company_team_member.index')
+                ->with('error', 'Không tìm thấy thành viên hoặc có lỗi xảy ra.');
+        }
     }
 
-    public function update(UpdateRequest $request, int $id): JsonResponse
+    /**
+     * Cập nhật thông tin
+     */
+    public function update(UpdateRequest $request, int $id)
     {
         try {
             $member = CompanyTeamMember::findOrFail($id);
 
             $data = $request->validated();
 
-            // decode social_links nếu là JSON string
-            if (!empty($data['social_links']) && is_string($data['social_links'])) {
-                $decoded = json_decode($data['social_links'], true);
-                $data['social_links'] = $decoded ?? [];
-            }
-
-            // xử lý boolean (checkbox)
-            $data['is_featured'] = $request->boolean('is_featured');
-
-            // xử lý ảnh
-            if ($request->hasFile('profile_image_url')) {
-                // xóa ảnh cũ nếu có
-                if ($member->profile_image_url && Storage::disk('public')->exists(str_replace('storage/', '', $member->profile_image_url))) {
-                    Storage::disk('public')->delete(str_replace('storage/', '', $member->profile_image_url));
+            if ($request->hasFile('profile_image_url') && $request->file('profile_image_url')->isValid()) {
+                if ($member->profile_image_url && file_exists(public_path($member->profile_image_url))) {
+                    unlink(public_path($member->profile_image_url));
                 }
 
                 $file = $request->file('profile_image_url');
-                $path = $file->store('uploads/team_members', 'public');
-                $data['profile_image_url'] = 'storage/' . $path;
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/team_members'), $filename);
+                $data['profile_image_url'] = 'uploads/team_members/' . $filename;
             }
 
             $member->update($data);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Cập nhật thành công',
-                'data' => $member
-            ]);
+            return redirect()->back()->with('success', 'Cập nhật thành công');
         } catch (Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Lỗi: ' . $e->getMessage(),
-            ], 500);
+            Log::error('CompanyTeamMember update error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
+        }
+    }
+
+    /**
+     * Xoá ảnh hồ sơ
+     */
+    public function removeImage(int $id): JsonResponse
+    {
+        try {
+            $member = CompanyTeamMember::findOrFail($id);
+
+            if ($member->profile_image_url && file_exists(public_path($member->profile_image_url))) {
+                unlink(public_path($member->profile_image_url));
+            }
+
+            $member->profile_image_url = null;
+            $member->save();
+
+            return response()->json(['message' => 'Ảnh đã được xoá'], 200);
+        } catch (Throwable $e) {
+            Log::error('Remove CompanyTeamMember image error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['message' => 'Có lỗi xảy ra, vui lòng thử lại'], 500);
         }
     }
 }

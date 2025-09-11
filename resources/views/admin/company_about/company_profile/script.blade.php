@@ -2,160 +2,154 @@
     <script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('vendor/datatables/buttons.server-side.js') }}"></script>
     <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
-    <script>
-        $(function () {
-
-            // -------------------
-            // Config / Elements
-            // -------------------
-            const $form = $('#editProfileForm');
-            const $saveBtn = $('#saveBtn');
-            const $spinner = $('#btnSpinner');
-            const $fileInput = $('#featured_image_url');
-            const $preview = $('#preview-featured-image');
-
-            // -------------------
-            // Helpers
-            // -------------------
-            const toggleButtonLoading = (state = true) => {
-                $saveBtn.prop('disabled', state);
-                $spinner.toggleClass('d-none', !state);
-            };
-
-            const showAlert = (icon, title, text, timer = 2000) => {
+    <script type="text/javascript">
+        $(function() {
+            // ===== Helper =====
+            const showSwal = (type, title, text, timer = 2000) => {
                 Swal.fire({
-                    icon, title, html: text,
-                    timer, showConfirmButton: !timer
+                    icon: type,
+                    title,
+                    text,
+                    timer,
+                    showConfirmButton: false
                 });
             };
 
-            const resetErrors = () => {
-                $form.find('.is-invalid').removeClass('is-invalid');
-                $form.find('.invalid-feedback').remove();
-                $('#form-errors').addClass('d-none').empty();
-            };
-
-            const showFieldError = ($input, msg) => {
-                $input.addClass('is-invalid');
-                if ($input.next('.invalid-feedback').length === 0) {
-                    $input.after(`<div class="invalid-feedback d-block">${msg}</div>`);
-                } else {
-                    $input.next('.invalid-feedback').html(msg);
-                }
-            };
-
-            const showLoadingFields = () => {
-                $('#form-fields').html(`
-                            <div class="text-center text-muted py-5">
-                                <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
-                            </div>
-                        `);
-            };
-
-            // -------------------
-            // DataTable init
-            // -------------------
-            const table = $('#company-profile-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route("admin.company_about.company_profile.index") }}',
-                columns: [
-                    { data: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'section_key', name: 'section_key' },
-                    { data: 'title', name: 'title' },
-                    { data: 'headline', name: 'headline' },
-                    { data: 'featured_image_url', name: 'featured_image_url' },
-                    { data: 'cta_label', name: 'cta_label' },
-                    { data: 'cta_link', name: 'cta_link' },
-                    { data: 'actions', orderable: false, searchable: false }
-                ]
-            });
-
-            // -------------------
-            // Open modal edit
-            // -------------------
-            $(document).on('click', '.btn-edit', function () {
-                const sectionKey = $(this).data('section');
-                $('#modalSectionKey').val(sectionKey);
-                resetErrors();
-                showLoadingFields();
-
-                const modalEl = document.getElementById('editProfileModal');
-                const modal = new bootstrap.Modal(modalEl);
-                modal.show();
-
-                $.get(`/admin/company_about/company_profile/${sectionKey}/edit`, function (res) {
-                    $('#form-fields').html(res.html);
-                });
-            });
-
-            // -------------------
-            // Submit form
-            // -------------------
-            $form.on('submit', function (e) {
-                e.preventDefault();
-                const sectionKey = $('#modalSectionKey').val();
-                const formData = new FormData(this);
-
-                toggleButtonLoading(true);
-                resetErrors();
-
-                $.ajax({
-                    url: `/admin/company_about/company_profile/${sectionKey}`,
-                    method: 'POST', // dùng POST + @method('PUT') trong form
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                }).done(res => {
-                    showAlert(res.icon || 'success',
-                        res.title || 'Thành công',
-                        res.text || 'Cập nhật thành công!');
-
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-                    modal.hide();
-                    table.ajax.reload(null, false);
-                }).fail(xhr => {
-                    const errs = xhr.responseJSON.errors;
-                    let list = [];
-                    for (const field in errs) {
-                        const $input = $form.find(`[name="${field}"]`);
-                        if ($input.length) {
-                            showFieldError($input, errs[field][0]);
-                        } else {
-                            $form.prepend(`<div class="alert alert-danger">${errs[field][0]}</div>`);
-                        }
-                        list.push(errs[field][0]);
-                    }
-                 showAlert('error', 'Lỗi xác thực từ server', list.join('<br>'));
-                }).
-                    always(() => {
-                        toggleButtonLoading(false);
-                    });
-            });
-
-            // -------------------
-            // Preview featured image
-            // -------------------
-            $(document).on('change', '#featured_image_url', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        let $preview = $('#preview-featured-image');
-                        if ($preview.length === 0) {
-                            $fileInput.after(
-                                `<div class="mt-2">
-                                            <img id="preview-featured-image" src="${e.target.result}" 
-                                                 alt="Preview" width="150" class="rounded shadow">
-                                        </div>`
-                            );
-                        } else {
-                            $preview.attr('src', e.target.result);
+            const fetchJson = async (url, options = {}) => {
+                try {
+                    const res = await fetch(url, options);
+                    const data = await res.json();
+                    return {
+                        ok: res.ok,
+                        data
+                    };
+                } catch (err) {
+                    console.error(err);
+                    return {
+                        ok: false,
+                        data: {
+                            message: 'Có lỗi xảy ra, vui lòng thử lại'
                         }
                     };
-                    reader.readAsDataURL(file);
+                }
+            };
+            // ===== Form Elements =====
+            const form = document.getElementById('companyProfileForm');
+            if (!form) return;
+
+            const featuredInput = document.getElementById('featured_image_url');
+            const featuredPreview = document.getElementById('featuredImagePreview');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitSpinner = document.getElementById('submitSpinner');
+            const btnText = submitBtn.querySelector('.btn-text');
+
+            // ===== Initial Values =====
+            const initialFormValues = {
+                section_key: '{{ $profile->section_key ?? '' }}',
+                title: '{{ $profile->title ?? '' }}',
+                headline: '{{ $profile->headline ?? '' }}',
+                cta_label: '{{ $profile->cta_label ?? '' }}',
+                cta_link: '{{ $profile->cta_link ?? '' }}',
+                summary: '{{ $profile->summary ?? '' }}',
+                body: '{{ $profile->body ?? '' }}'
+            };
+
+            const initialValues = {
+                featured_image_url: '{{ isset($profile) && $profile->featured_image_url ? asset($profile->featured_image_url) : asset('uploads/no_image.jpg') }}'
+            };
+
+            const profileId = {{ isset($profile) ? $profile->id : 'null' }};
+
+            // ===== Image Functions =====
+            const resetImage = () => {
+                featuredPreview.src = initialValues.featured_image_url;
+                featuredPreview.style.display = 'block';
+                removeImageBtn.style.display =
+                    '{{ isset($profile) && $profile->featured_image_url ? 'inline-block' : 'none' }}';
+                featuredInput.value = '';
+            };
+
+            featuredInput?.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (file) {
+                    featuredPreview.src = URL.createObjectURL(file);
+                    featuredPreview.style.display = 'block';
+                    removeImageBtn.style.display = 'inline-block';
+                    featuredPreview.onload = () => URL.revokeObjectURL(featuredPreview.src);
+                } else resetImage();
+            });
+
+            removeImageBtn?.addEventListener('click', async () => {
+                if (!profileId) return;
+
+                const result = await Swal.fire({
+                    title: 'Bạn có chắc muốn xoá ảnh này?',
+                    text: "Sau khi xoá sẽ không thể phục hồi!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Có, xoá ngay!',
+                    cancelButtonText: 'Huỷ'
+                });
+
+                if (!result.isConfirmed) return;
+
+                const {
+                    ok,
+                    data
+                } = await fetchJson(`/admin/company_about/company_profile/remove-image/${profileId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (ok) {
+                    resetImage();
+                    showSwal('success', 'Thành công', data.message, 2500);
+                } else {
+                    showSwal('error', 'Lỗi', data.message);
                 }
             });
+
+            // ===== Reset Form =====
+            resetBtn?.addEventListener('click', () => {
+                // Reset tất cả input & textarea về giá trị ban đầu (PUT)
+                Object.keys(initialFormValues).forEach(name => {
+                    const el = form.querySelector(`[name="${name}"]`);
+                    if (el) el.value = initialFormValues[name];
+                });
+
+                // Reset image về giá trị ban đầu
+                resetImage();
+
+                // Reset submit button
+                submitSpinner.classList.add('d-none');
+                btnText.textContent = 'Update';
+                [...form.querySelectorAll('button')].forEach(btn => btn.disabled = false);
+
+                // Remove validation errors
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            });
+
+            // ===== Submit =====
+            form.addEventListener('submit', () => {
+                submitSpinner.classList.remove('d-none');
+                btnText.textContent = 'Updating...';
+                [...form.querySelectorAll('button')].forEach(btn => btn.disabled = true);
+            });
+
+            // ===== Flash =====
+            @if (session('success'))
+                showSwal('success', 'Thành công', '{{ session('success') }}');
+            @endif
+
+
 
         });
     </script>
