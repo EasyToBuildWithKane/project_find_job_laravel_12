@@ -87,7 +87,10 @@ class CompanyProfileController extends Controller
                 $profile->update($data);
             });
 
-            return redirect()->back()->with('success', 'Cập nhật thành công');
+            return redirect()
+            ->route('admin.company_about.company_profile.index')
+            ->with('success', 'Cập nhật thành công');
+
 
         } catch (Exception $e) {
             Log::error('CompanyProfile update error', [

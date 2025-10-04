@@ -89,6 +89,7 @@ class CompanyTeamMemberController extends Controller
 
             $member->update($data);
 
+
             return redirect()->back()->with('success', 'Cập nhật thành công');
         } catch (Throwable $e) {
             Log::error('CompanyTeamMember update error', [

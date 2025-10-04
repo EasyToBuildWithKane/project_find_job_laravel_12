@@ -14,7 +14,7 @@ class CompanyProfileController extends Controller
     {
         $profiles = Cache::remember('company_profiles_all', 600, function () {
             return CompanyProfile::query()
-                ->select(['section_key', 'title', 'summary', 'body', 'featured_image_url', 'cta_label', 'cta_link'])
+                ->select(['section_key','headline', 'title', 'summary', 'body', 'featured_image_url', 'cta_label', 'cta_link'])
                 ->orderBy('section_key')
                 ->get();
         });

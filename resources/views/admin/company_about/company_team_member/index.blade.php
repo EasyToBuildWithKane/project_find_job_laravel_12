@@ -25,7 +25,7 @@
                                 <th>Location</th>
                                 <th>Profile Image</th>
                                 <th>Featured</th>
-                                <th>Display Order</th>
+
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -41,63 +41,76 @@
     <script src="{{ asset('vendor/datatables/buttons.server-side.js') }}"></script>
     <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
     <script>
-        $(function() {
-            $('#team-member-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route('admin.company_about.company_team_member.index') }}',
-                columns: [{
-                        data: 'id',
-                        name: 'id'
-                    },
-                    {
-                        data: 'full_name',
-                        name: 'full_name'
-                    },
-                    {
-                        data: 'job_title',
-                        name: 'job_title'
-                    },
-                    {
-                        data: 'department',
-                        name: 'department'
-                    },
-                    {
-                        data: 'location',
-                        name: 'location'
-                    },
-                    {
-                        data: 'profile_image_url',
-                        name: 'profile_image_url',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'is_featured',
-                        name: 'is_featured',
-                        orderable: true,
-                        searchable: true,
-                        render: function(data) {
-                            return data ?
-                                '<span class="badge bg-success">Yes</span>' :
-                                '<span class="badge bg-secondary">No</span>';
-                        }
-                    },
-                    {
-                        data: 'display_order',
-                        name: 'display_order'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
+
+        $(function () {
+            // ===== Helper =====
+            const showSwal = (type, title, text, timer = 2000) => {
+                Swal.fire({
+                    icon: type,
+                    title,
+                    text,
+                    timer,
+                    showConfirmButton: false
+                });
+            };
+            // ===== Flash =====
+            @if (session('success'))
+                showSwal('success', 'Thành công', '{{ session('success') }}');
+            @endif
+
+
+
+                    data: 'id',
+                    name: 'id'
+                },
+                {
+                    data: 'full_name',
+                    name: 'full_name'
+                },
+                {
+                    data: 'job_title',
+                    name: 'job_title'
+                },
+                {
+                    data: 'department',
+                    name: 'department'
+                },
+                {
+                    data: 'location',
+                    name: 'location'
+                },
+                {
+                    data: 'profile_image_url',
+                    name: 'profile_image_url',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'is_featured',
+                    name: 'is_featured',
+                    orderable: true,
+                    searchable: true,
+                    render: function (data) {
+                        return data ?
+                            '<span class="badge bg-success">Show</span>' :
+                            '<span class="badge bg-secondary">Hide</span>';
                     }
+                },
+                
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false
+                }
+
                 ],
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
                 order: [
-                    [0, 'desc']
+
+                    [0, 'asc']
+
                 ],
                 dom: "<'d-flex justify-content-between align-items-center mb-3'f'l>" +
                     "rt" +
@@ -106,4 +119,6 @@
             });
         });
     </script>
+
 @endpush
+

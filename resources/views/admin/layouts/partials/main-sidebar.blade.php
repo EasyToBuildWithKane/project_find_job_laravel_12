@@ -19,11 +19,12 @@
             <li class="menu-header">PAGES</li>
             <li class="dropdown">
                 <a href="#" class="nav-link has-dropdown">
-                    <i class="fas fa-puzzle-piece"></i> 
-                    <span>Company About</span></a>
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span>Settings<span></a>
                 <ul class="dropdown-menu">
                     <li><a href="{{ route('admin.company_about.company_profile.index') }}">Our Company</a></li>
                     <li><a href="{{ route('admin.company_about.company_team_member.index') }}">Our Team</a></li>
+                    <li><a href="{{ route('admin.company_about.why_choose_us.index') }}">Why choose us</a></li>
                 </ul>
             </li>
 

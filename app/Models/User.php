@@ -14,9 +14,8 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasUuids;
 
-   
+  
     protected $fillable = [
-        'id',
         'username',
         'email',
         'phone',
@@ -46,22 +45,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'marketing_opt_in',
     ];
 
-    /**
-     * Các field cần ẩn khi trả về JSON.
-     *
-     * @var array<int, string>
-     */
+    
     protected $hidden = [
         'password',
         'remember_token',
         'two_factor_secret',
     ];
 
-    /**
-     * Các field được cast tự động.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
@@ -72,12 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_enabled' => 'boolean',
     ];
 
-    /**
-     * =========================
-     * Quan hệ Eloquent
-     * =========================
-     */
-
+   
     public function kycVerifier()
     {
         return $this->belongsTo(User::class, 'kyc_verified_by');
@@ -92,7 +77,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(User::class, 'referred_by');
     }
-
 
     public function otps()
     {

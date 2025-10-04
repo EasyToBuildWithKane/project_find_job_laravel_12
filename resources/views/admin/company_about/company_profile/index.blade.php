@@ -44,6 +44,23 @@
     <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
     <script>
         $(function() {
+
+               const showSwal = (type, title, text, timer = 2000) => {
+                Swal.fire({
+                    icon: type,
+                    title,
+                    text,
+                    timer,
+                    showConfirmButton: false
+                });
+            };
+               // ===== Flash =====
+            @if (session('success'))
+                showSwal('success', 'Thành công', '{{ session('success') }}');
+            @endif
+
+
+
             $('#company-profile-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -88,7 +105,9 @@
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
                 order: [
-                    [0, 'desc']
+
+                    [0, 'asc']
+
                 ],
                 dom: "<'d-flex justify-content-between align-items-center mb-3'f'l>" +
                     "rt" + // table

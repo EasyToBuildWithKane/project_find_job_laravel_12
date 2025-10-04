@@ -69,44 +69,16 @@
                             @enderror
                         </div>
 
-                        <!-- Rating -->
-                        <div class="col-md-3">
-                            <label class="form-label">Rating (1-5)</label>
-                            <input type="number" class="form-control @error('rating') is-invalid @enderror" name="rating"
-                                value="{{ old('rating', $member->rating) }}" min="1" max="5">
-                            @error('rating')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Review Count -->
-                        <div class="col-md-3">
-                            <label class="form-label">Review Count</label>
-                            <input type="number" class="form-control @error('review_count') is-invalid @enderror"
-                                name="review_count" value="{{ old('review_count', $member->review_count) }}"
-                                min="0">
-                            @error('review_count')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Display Order -->
-                        <div class="col-md-3">
-                            <label class="form-label">Display Order</label>
-                            <input type="number" class="form-control @error('display_order') is-invalid @enderror"
-                                name="display_order" value="{{ old('display_order', $member->display_order) }}"
-                                min="0">
-                            @error('display_order')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
 
                         <!-- Featured -->
                         <div class="col-md-3 d-flex align-items-center">
                             <div class="form-check mt-4">
-                                <input type="checkbox" class="form-check-input" name="is_featured" value="1"
-                                    id="is_featured" {{ old('is_featured', $member->is_featured) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_featured">Featured</label>
+                                <select name="is_featured" id="is_featured">
+                                    <option value="1">True</option>
+                                    <option value="0">False </option>
+                                </select>
+
                             </div>
                         </div>
 
