@@ -65,14 +65,14 @@ class AdminProfileRequest extends FormRequest
         $youngestDate = Carbon::now()->subYears(13)->toDateString();
 
         return [
-            'username' => [
+              'username' => [
                 'required',
                 'string',
                 'min:4',
                 'max:50',
                 'not_regex:/^\d+$/',
-                'regex:/^(?!.*[._-]{2})[\p{L}\p{N}](?:[\p{L}\p{N}._-]{2,48})[\p{L}\p{N}]$/u',
-                Rule::notIn(['admin','administrator','root','system','support','superadmin','staff','user','null']),
+                'regex:/^[\pL\pN][\pL\pN._-]{2,48}[\pL\pN]$/u',
+
                 Rule::unique('users', 'username')->ignore($userId),
             ],
 

@@ -91,6 +91,7 @@ class CompanyProfileController extends Controller
             ->route('admin.company_about.company_profile.index')
             ->with('success', 'Cập nhật thành công');
 
+
         } catch (Exception $e) {
             Log::error('CompanyProfile update error', [
                 'id' => $id,

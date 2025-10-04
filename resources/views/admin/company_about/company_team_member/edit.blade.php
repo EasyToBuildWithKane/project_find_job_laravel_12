@@ -69,6 +69,7 @@
                             @enderror
                         </div>
 
+
                         <!-- Featured -->
                         <div class="col-md-3 d-flex align-items-center">
                             <div class="form-check mt-4">
@@ -77,6 +78,7 @@
                                     <option value="1">True</option>
                                     <option value="0">False </option>
                                 </select>
+
                             </div>
                         </div>
 

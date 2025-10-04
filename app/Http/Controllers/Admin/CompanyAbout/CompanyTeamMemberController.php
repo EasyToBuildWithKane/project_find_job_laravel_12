@@ -89,9 +89,8 @@ class CompanyTeamMemberController extends Controller
 
             $member->update($data);
 
-            return redirect()
-                ->route('admin.company_about.company_team_member.index')
-                ->with('success', 'Cập nhật thành công');
+
+            return redirect()->back()->with('success', 'Cập nhật thành công');
         } catch (Throwable $e) {
             Log::error('CompanyTeamMember update error', [
                 'id' => $id,

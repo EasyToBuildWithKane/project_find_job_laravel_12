@@ -36,10 +36,11 @@ Route::middleware(['auth.session'])
             ->name('company_about.company_profile.')
             ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/{sectionKey}/edit', 'edit')->name('edit');
-            Route::put('/{sectionKey}', 'update')->name('update');
-        });
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
 
+        });
         Route::controller(CompanyTeamMemberController::class)
             ->prefix('company_about/company_team_member')
             ->name('company_about.company_team_member.')
@@ -47,8 +48,7 @@ Route::middleware(['auth.session'])
                 Route::get('/', 'index')->name('index');
                 Route::get('/{id}/edit', 'edit')->name('edit');
                 Route::put('/{id}', 'update')->name('update');
-                Route::delete('/{id}/remove-photo', 'removePhoto')
-                    ->name('remove-photo');
+                Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
             });
 
     });

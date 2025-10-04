@@ -25,6 +25,7 @@
                                 <th>Location</th>
                                 <th>Profile Image</th>
                                 <th>Featured</th>
+
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -40,6 +41,7 @@
     <script src="{{ asset('vendor/datatables/buttons.server-side.js') }}"></script>
     <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
     <script>
+
         $(function () {
             // ===== Helper =====
             const showSwal = (type, title, text, timer = 2000) => {
@@ -56,11 +58,8 @@
                 showSwal('success', 'Thành công', '{{ session('success') }}');
             @endif
 
-            $('#team-member-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route('admin.company_about.company_team_member.index') }}',
-                columns: [{
+
+
                     data: 'id',
                     name: 'id'
                 },
@@ -104,11 +103,14 @@
                     orderable: false,
                     searchable: false
                 }
+
                 ],
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
                 order: [
+
                     [0, 'asc']
+
                 ],
                 dom: "<'d-flex justify-content-between align-items-center mb-3'f'l>" +
                     "rt" +
@@ -117,4 +119,6 @@
             });
         });
     </script>
+
 @endpush
+
