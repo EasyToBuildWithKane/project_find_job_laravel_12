@@ -22,14 +22,14 @@ class CompanyTeamMember extends Model
     ];
 
     protected $casts = [
-        'social_links' => 'array',
-        'is_featured' => 'boolean',
-        'rating' => 'integer',
-        'review_count' => 'integer',
+        'social_links'  => 'array',
+        'is_featured'   => 'boolean',
+        'rating'        => 'integer',
+        'review_count'  => 'integer',
     ];
 
     /**
-     * Scope: Chỉ lấy những thành viên nổi bật (featured)
+     * Scope: chỉ lấy những thành viên nổi bật (featured).
      */
     public function scopeFeatured($query)
     {
@@ -37,7 +37,7 @@ class CompanyTeamMember extends Model
     }
 
     /**
-     * Scope: Sắp xếp theo thứ tự hiển thị
+     * Scope: sắp xếp theo thứ tự hiển thị.
      */
     public function scopeOrdered($query)
     {

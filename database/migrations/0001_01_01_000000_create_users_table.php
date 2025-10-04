@@ -10,9 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        Schema::create('users', function (Blueprint $table) {
+            // UUID làm primary key
+            $table->uuid('id')->primary();
 
-         Schema::create('users', function (Blueprint $table) {
-            $table->id();
             $table->string('username', 100)->unique();
             $table->string('email', 150)->unique()->nullable();
             $table->string('phone', 20)->unique()->nullable();
@@ -54,10 +55,14 @@ return new class extends Migration {
 
             $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->nullable();
             $table->timestamp('kyc_submitted_at')->nullable();
-            $table->foreignId('kyc_verified_by')->nullable()->constrained('users')->nullOnDelete();
+
+            // Khóa ngoại cũng là UUID
+            $table->uuid('kyc_verified_by')->nullable();
+            $table->foreign('kyc_verified_by')->references('id')->on('users')->nullOnDelete();
 
             $table->string('referral_code', 50)->nullable();
-            $table->foreignId('referred_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->uuid('referred_by')->nullable();
+            $table->foreign('referred_by')->references('id')->on('users')->nullOnDelete();
 
             $table->boolean('marketing_opt_in')->default(false);
             $table->timestamp('privacy_policy_accepted_at')->nullable();
@@ -75,8 +80,6 @@ return new class extends Migration {
             $table->index(['last_login_at']);
         });
 
-
-
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -85,7 +88,7 @@ return new class extends Migration {
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->uuid('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

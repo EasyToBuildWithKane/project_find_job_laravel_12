@@ -23,7 +23,6 @@ class UpdateRequest extends FormRequest
                 'image',
                 'mimes:jpg,jpeg,png,webp,gif',
                 'max:2048',
-                'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000'
             ],
             'cta_label' => 'nullable|string|max:100',
 
@@ -41,7 +40,6 @@ class UpdateRequest extends FormRequest
             'featured_image_url.image' => 'Ảnh đại diện phải là một hình ảnh hợp lệ.',
             'featured_image_url.mimes' => 'Ảnh đại diện chỉ được phép có định dạng: jpg, jpeg, png, webp, gif.',
             'featured_image_url.max' => 'Ảnh đại diện không được vượt quá 2MB.',
-            'featured_image_url.dimensions' => 'Kích thước ảnh không hợp lệ. Yêu cầu tối thiểu 100x100 và tối đa 2000x2000.',
         ];
     }
 }

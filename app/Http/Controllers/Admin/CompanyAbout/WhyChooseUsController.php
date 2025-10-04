@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers\Admin\CompanyAbout;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CompanyAbout\WhyChooseUsRequest;
+use App\Models\WhyChooseUs;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
+use Throwable;
+
+class WhyChooseUsController extends Controller
+{
+    /**
+     * Trang index + DataTables
+     */
+    public function index(Request $request)
+    {
+        if ($request->ajax()) {
+            $query = WhyChooseUs::query()->orderBy('id', 'asc');
+
+            return DataTables::of($query)
+                ->addColumn('action', function ($row) {
+                    $editUrl = route('admin.company_about.why_choose_us.edit', $row->id);
+                    return '<a href="' . $editUrl . '" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Sửa
+                            </a>';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('admin.company_about.why_choose_us.index');
+    }
+
+    /**
+     * Trang edit
+     */
+    public function edit(int $id)
+    {
+        try {
+            $item = WhyChooseUs::findOrFail($id);
+            return view('admin.company_about.why_choose_us.edit', compact('item'));
+        } catch (Throwable $e) {
+            Log::error('WhyChooseUs edit error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('admin.company_about.why_choose_us.index')
+                ->with('error', 'Không tìm thấy item hoặc có lỗi xảy ra.');
+        }
+    }
+
+    /**
+     * Cập nhật thông tin
+     */
+    public function update(Request $request, int $id)
+    {
+        try {
+            $item = WhyChooseUs::findOrFail($id);
+            $data = $request->except('_token');
+
+            $item->update($data);
+
+            return redirect()
+                ->route('admin.company_about.why_choose_us.index')
+                ->with('success', 'Cập nhật thành công');
+        } catch (Throwable $e) {
+            Log::error('WhyChooseUs update error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
+        }
+    }
+}

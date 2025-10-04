@@ -12,7 +12,9 @@ return new class extends Migration {
     {
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+
+            $table->uuid('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
 
             $table->string('otp', 10);
             $table->string('context', 50)->index();
