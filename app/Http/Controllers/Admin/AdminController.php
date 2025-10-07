@@ -3,140 +3,179 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\AdminProfileService;
-
-use App\Models\User;
-
-use Illuminate\Http\Request;
 use App\Http\Requests\Admin\Admin\AdminPasswordRequest;
 use App\Http\Requests\Admin\Admin\AdminProfileRequest;
-
+use App\Http\Services\AdminProfileService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class AdminController extends Controller
 {
-    protected AdminProfileService $profileService;
-
-    public function __construct(AdminProfileService $profileService)
-    {
-        $this->profileService = $profileService;
+    public function __construct(
+        protected AdminProfileService $profileService
+    ) {
     }
 
+    /**
+     * Đăng xuất tài khoản admin.
+     */
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
+        $guard = Auth::getDefaultDriver();
+
+        Auth::guard($guard)->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Bạn đã đăng xuất thành công.');
+        return redirect()
+            ->route('login')
+            ->with('success', __('Bạn đã đăng xuất thành công.'));
     }
 
+    /**
+     * Hiển thị trang thông tin cá nhân.
+     */
     public function showProfile()
     {
         $data = Auth::user();
+
         return view('admin.profile.admin_profile', compact('data'));
     }
 
+    /**
+     * Cập nhật thông tin cá nhân.
+     */
     public function updateProfile(AdminProfileRequest $request)
     {
         try {
-            $user = $this->profileService->updateProfile(
+            $admin = $this->profileService->updateProfile(
                 Auth::user(),
-                $request->only(['username', 'first_name', 'last_name', 'phone', 'link_social','gender','dob','full_name']),
+                $request->only([
+                    'username',
+                    'first_name',
+                    'last_name',
+                    'phone',
+                    'link_social',
+                    'gender',
+                    'dob',
+                    'full_name'
+                ]),
                 $request->file('avatar_url'),
                 $request->boolean('remove_current_photo')
             );
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Cập nhật thông tin cá nhân thành công.',
+                'message' => __('Cập nhật thông tin cá nhân thành công.'),
                 'data' => [
-                    'username' => $user->username,
-                    'phone' => $user->phone,
-                    'link_social' => $user->link_social,
-                    'avatar_url' => $user->avatar_url ? asset('uploads/images/' . $user->avatar_url) : asset('uploads/no_image.jpg'),
+                    'username' => $admin->username,
+                    'phone' => $admin->phone,
+                    'link_social' => $admin->link_social,
+                    'avatar_url' => $admin->avatar_url
+                        ? asset("uploads/images/{$admin->avatar_url}")
+                        : asset('uploads/no_image.jpg'),
                 ]
             ]);
-
         } catch (Throwable $e) {
-            Log::error('Cập nhật profile thất bại trong controller', [
+            Log::error('Admin profile update failed', [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cập nhật thông tin thất bại. Vui lòng thử lại.'
+                'message' => __('Cập nhật thông tin thất bại. Vui lòng thử lại.'),
             ], 500);
         }
     }
 
+    /**
+     * Xoá ảnh đại diện.
+     */
     public function removePhoto(Request $request)
     {
-        $user = Auth::user();
+        $admin = Auth::user();
 
-        if (!$user || empty($user->photo)) {
+        if (!$admin || !$admin->avatar_url) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Không có ảnh để xóa.'
+                'message' => __('Không có ảnh để xoá.'),
             ], 400);
         }
 
         try {
-            $this->profileService->updateProfile($user, [], null, true);
+            $this->profileService->updateProfile($admin, [], null, true);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Ảnh đại diện đã được xóa.',
-                'photo' => asset('uploads/no_image.jpg')
+                'message' => __('Ảnh đại diện đã được xoá.'),
+                'photo' => asset('uploads/no_image.jpg'),
             ]);
-
         } catch (Throwable $e) {
-            Log::error('Xóa avatar thất bại', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
+            Log::error('Admin avatar removal failed', [
+                'user_id' => $admin->id,
+                'exception' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Xóa avatar thất bại.'
+                'message' => __('Xoá avatar thất bại.'),
             ], 500);
         }
     }
 
-   
+    /**
+     * Hiển thị form đổi mật khẩu.
+     */
     public function showChangePassword()
     {
-        $id = Auth::user()->id;
-        $data = User::find($id);
-        return view('admin.profile.change_pass', compact('data'));
+        $admin = Auth::user();
+
+        return view('admin.profile.change_pass', compact('admin'));
     }
 
-    
+    /**
+     * Cập nhật mật khẩu.
+     */
     public function updatePassword(AdminPasswordRequest $request)
     {
-        $user = User::find(Auth::id());
+        try {
+            $this->profileService->changePassword(
+                Auth::user(),
+                $request->old_password,
+                $request->new_password
+            );
 
-        if (!Hash::check($request->old_password, $user->password)) {
+            // Đăng xuất sau khi đổi mật khẩu thành công
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại!',
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Lỗi xác thực (ví dụ mật khẩu cũ sai)
             return response()->json([
                 'status' => 'error',
-                'message' => 'Mật khẩu cũ không đúng.'
+                'message' => $e->getMessage(),
             ], 422);
+
+        } catch (Throwable $e) {
+            Log::error('Lỗi khi đổi mật khẩu', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra trong quá trình đổi mật khẩu. Vui lòng thử lại.',
+            ], 500);
         }
-
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại!'
-        ]);
     }
+
 }

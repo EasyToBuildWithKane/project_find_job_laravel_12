@@ -21,15 +21,15 @@
                 <a href="{{ route('admin.profile.show') }}" class="dropdown-item has-icon">
                     <i class="far fa-user"></i> Profile
                 </a>
-                <a href="{{ route('admin.password.show') }}" class="dropdown-item has-icon">
+                <a href="{{ route('admin.profile.password.show') }}" class="dropdown-item has-icon">
                     <i class="fas fa-cog"></i> Change Password
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="{{ route('admin.logouts') }}" class="dropdown-item has-icon text-danger"
+                <a href="{{ route('admin.profile.logouts') }}" class="dropdown-item has-icon text-danger"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
-                <form id="logout-form" action="{{ route('admin.logouts') }}" method="get" style="display: none;">
+                <form id="logout-form" action="{{ route('admin.profile.logouts') }}" method="get" style="display: none;">
                     @csrf
                 </form>
             </div>

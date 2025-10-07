@@ -22,7 +22,7 @@ class UserFactory extends Factory
             'email' => Str::lower(Str::slug($fullName)) . $this->faker->unique()->numberBetween(100, 999) . '@gmail.com',
             'phone' => $this->faker->randomElement(['03', '05', '07', '08', '09']) . $this->faker->numerify('########'),
             'password' => Hash::make('123456'),
-            'role' => $this->faker->randomElement(['freelancer', 'employer']),
+            'role' => $this->faker->randomElement(['freelancer', 'employer','admin']),
             'status' => 'active',
             'first_name' => $firstName,
             'last_name' => $lastName,

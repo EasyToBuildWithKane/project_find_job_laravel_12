@@ -16,8 +16,9 @@ class DatabaseSeeder extends Seeder
     {
 
         $this->call([
-            CompanyProfileSeeder::class,
-            CompanyTeamMemberSeeder::class,
+            // CompanyProfileSeeder::class,
+            // CompanyTeamMemberSeeder::class,
+            // WhyChooseUsSeeder::class
         ]);
 
     //    User::factory()->count(10)->create();

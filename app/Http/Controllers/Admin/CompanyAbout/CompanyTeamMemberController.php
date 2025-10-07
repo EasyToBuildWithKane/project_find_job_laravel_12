@@ -5,21 +5,18 @@ namespace App\Http\Controllers\Admin\CompanyAbout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CompanyAbout\CompanyTeamMember\UpdateRequest;
 use App\Models\CompanyTeamMember;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
 class CompanyTeamMemberController extends Controller
 {
-    /**
-     * Trang index + DataTables
-     */
-    public function index(Request $request)
+    public function index()
     {
-        if ($request->ajax()) {
+        if (request()->ajax()) {
             $query = CompanyTeamMember::query();
 
             return DataTables::of($query)
@@ -30,14 +27,22 @@ class CompanyTeamMemberController extends Controller
                             </a>';
                 })
                 ->editColumn('profile_image_url', function ($row) {
-                    if ($row->profile_image_url) {
-                        return '<img src="' . asset($row->profile_image_url) . '" style="height:40px;width:auto;">';
-                    }
-                    return '-';
+                    $imageUrl = $row->profile_image_url
+                        ? asset($row->profile_image_url)
+                        : asset('uploads/no_image.jpg');
+
+                    return '<img src="' . e($imageUrl) . '" alt="Ảnh đại diện" 
+                class="img-thumbnail rounded-circle" 
+                style="height: 60px; width: 60px; object-fit: cover;">';
                 })
-                ->editColumn('is_featured', function ($row) {
-                    return $row->is_featured ? '<span class="badge bg-success">Nổi bật</span>' : '<span class="badge bg-secondary">Bình thường</span>';
-                })
+
+                ->editColumn(
+                    'is_featured',
+                    fn($row) =>
+                    $row->is_featured
+                    ? '<span class="badge bg-success">Nổi bật</span>'
+                    : '<span class="badge bg-secondary">Bình thường</span>'
+                )
                 ->rawColumns(['action', 'profile_image_url', 'is_featured'])
                 ->make(true);
         }
@@ -45,9 +50,6 @@ class CompanyTeamMemberController extends Controller
         return view('admin.company_about.company_team_member.index');
     }
 
-    /**
-     * Trang edit
-     */
     public function edit(int $id)
     {
         try {
@@ -57,74 +59,92 @@ class CompanyTeamMemberController extends Controller
             Log::error('CompanyTeamMember edit error', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
             ]);
 
-            return redirect()->route('admin.company_about.company_team_member.index')
+            return redirect()
+                ->route('admin.company_about.company_team_member.index')
                 ->with('error', 'Không tìm thấy thành viên hoặc có lỗi xảy ra.');
         }
     }
 
-    /**
-     * Cập nhật thông tin
-     */
     public function update(UpdateRequest $request, int $id)
     {
+        $member = CompanyTeamMember::findOrFail($id);
+
         try {
-            $member = CompanyTeamMember::findOrFail($id);
+            DB::transaction(function () use ($request, $member) {
+                $data = $request->validated();
 
-            $data = $request->validated();
-
-            if ($request->hasFile('profile_image_url') && $request->file('profile_image_url')->isValid()) {
-                if ($member->profile_image_url && file_exists(public_path($member->profile_image_url))) {
-                    unlink(public_path($member->profile_image_url));
+                if ($request->hasFile('profile_image_url')) {
+                    $data['profile_image_url'] = $this->uploadImage($request, $member);
                 }
 
-                $file = $request->file('profile_image_url');
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/team_members'), $filename);
-                $data['profile_image_url'] = 'uploads/team_members/' . $filename;
-            }
+                $member->update($data);
+            });
 
-            $member->update($data);
-
-
-            return redirect()->back()->with('success', 'Cập nhật thành công');
+            return back()->with('success', 'Cập nhật thành công');
         } catch (Throwable $e) {
             Log::error('CompanyTeamMember update error', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-
-            return redirect()->back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
+            return back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
         }
     }
 
     /**
-     * Xoá ảnh hồ sơ
+     * Upload ảnh vào public/uploads/team_members/
+     * và xóa ảnh cũ nếu có.
+     */
+    private function uploadImage($request, CompanyTeamMember $member): string
+    {
+        $file = $request->file('profile_image_url');
+
+        if (!$file->isValid()) {
+            throw new RuntimeException('File upload không hợp lệ.');
+        }
+
+        // Thư mục lưu file trong public/
+        $uploadPath = public_path('uploads/team_members');
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Xóa ảnh cũ (nếu có)
+        if ($member->profile_image_url && file_exists(public_path($member->profile_image_url))) {
+            @unlink(public_path($member->profile_image_url));
+        }
+
+        // Tạo tên file duy nhất
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move($uploadPath, $filename);
+
+        return 'uploads/team_members/' . $filename;
+    }
+
+    /**
+     * Xóa ảnh hồ sơ của thành viên
      */
     public function removeImage(int $id): JsonResponse
     {
         try {
             $member = CompanyTeamMember::findOrFail($id);
 
-            if ($member->profile_image_url && file_exists(public_path($member->profile_image_url))) {
-                unlink(public_path($member->profile_image_url));
+            if ($member->profile_image_url) {
+                $path = public_path($member->profile_image_url);
+                if (file_exists($path)) {
+                    @unlink($path);
+                }
+
+                $member->update(['profile_image_url' => null]);
             }
 
-            $member->profile_image_url = null;
-            $member->save();
-
-            return response()->json(['message' => 'Ảnh đã được xoá'], 200);
+            return response()->json(['message' => 'Ảnh đã được xoá']);
         } catch (Throwable $e) {
             Log::error('Remove CompanyTeamMember image error', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-
             return response()->json(['message' => 'Có lỗi xảy ra, vui lòng thử lại'], 500);
         }
     }

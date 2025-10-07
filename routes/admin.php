@@ -1,21 +1,46 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CompanyAbout\CompanyProfileController;
 use App\Http\Controllers\Admin\CompanyAbout\CompanyTeamMemberController;
+use App\Http\Controllers\Admin\CompanyAbout\WhyChooseUsController;
 
-use Illuminate\Support\Facades\Route;
+/*
+|--------------------------------------------------------------------------
+| Admin Protected Routes
+|--------------------------------------------------------------------------
+| Đây là khu vực chỉ dành cho tài khoản admin hợp lệ.
+| Middleware `auth.session` có thể thay bằng `auth:admin` nếu có multi-guard.
+| Mọi route đều được prefix bởi /admin trong bootstrap/app.php
+*/
 
-
-// ===== ADMIN / PROTECTED =====
-
-Route::middleware(['auth.session'])
+Route::middleware(['auth.session', 'role:admin'])
     ->group(function () {
-        // Dashboard
+
+        /**
+         * Dashboard
+         */
         Route::get('/dashboard', [DashboardController::class, 'AdminDashboard'])
             ->name('dashboard');
 
+        /**
+         *  Admin Profile & Password Management
+         */
+        Route::controller(AdminController::class)
+            ->prefix('profile')
+            ->name('profile.')
+            ->group(function () {
+                Route::get('/', 'showProfile')->name('show');
+                Route::post('/', 'updateProfile')->name('update');
+                Route::post('/remove-photo', 'removePhoto')->name('remove-photo');
+
+                Route::get('/password/change', 'showChangePassword')->name('password.show');
+                Route::post('/password/update', 'updatePassword')->name('password.update');
+
+                Route::get('/logouts', 'logout')->name('logouts');
+            });
         // Admin profile & password
         Route::controller(AdminController::class)->group(function () {
             // Profile
@@ -29,28 +54,50 @@ Route::middleware(['auth.session'])
             Route::get('/logouts', 'logout')->name('logouts');
         });
 
-        // Admin Company About
-        // Company Profile
-        Route::controller(CompanyProfileController::class)
-            ->prefix('company_about/company_profile')
-            ->name('company_about.company_profile.')
+        /**
+         * Company About Section
+         */
+        Route::prefix('company_about')
+            ->name('company_about.')
             ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
 
-        });
-        Route::controller(CompanyTeamMemberController::class)
-            ->prefix('company_about/company_team_member')
-            ->name('company_about.company_team_member.')
-            ->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::get('/{id}/edit', 'edit')->name('edit');
-                Route::put('/{id}', 'update')->name('update');
-                Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
+                // Company Profile
+                Route::controller(CompanyProfileController::class)
+                    ->prefix('profile')
+                    ->name('company_profile.')
+                    ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}/edit', 'edit')->name('edit');
+                    Route::put('/{id}', 'update')->name('update');
+                    Route::post('/remove_image/{id}', 'removeImage')->name('remove-image');
+                });
+
+                // Company Team Member
+                Route::controller(CompanyTeamMemberController::class)
+                    ->prefix('team_member')
+                    ->name('company_team_member.')
+                    ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}/edit', 'edit')->name('edit');
+                    Route::put('/{id}', 'update')->name('update');
+                    Route::post('/remove_image/{id}', 'removeImage')->name('remove_image');
+                });
+               
+                 // Why Choose Us
+                Route::controller(WhyChooseUsController::class)
+                    ->prefix('why_choose_us')
+                    ->name('why_choose_us.')
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::get('/create', 'create')->name('create');
+                        Route::post('/', 'store')->name('store');
+                        Route::get('/{id}/edit', 'edit')->name('edit');
+                        Route::put('/{id}', 'update')->name('update');
+                        Route::delete('/{id}', 'destroy')->name('destroy');
+                        Route::post('/remove_image/{id}', 'removeImage')->name('remove_image');
+                    });
             });
-
     });
-// Bao gồm routes auth mặc định
+
+
 require __DIR__ . '/auth.php';

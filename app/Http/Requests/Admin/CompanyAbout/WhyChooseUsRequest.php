@@ -16,19 +16,15 @@ class WhyChooseUsRequest extends FormRequest
         return [
             'section_title' => 'nullable|string|max:255',
             'section_subtitle' => 'nullable|string|max:255',
-            'icon_type' => 'required|in:class,image,svg',
-            'icon_value' => 'nullable|string',
             'item_title' => 'required|string|max:255',
             'item_description' => 'nullable|string',
-            'sort_order' => 'nullable|integer|min:0',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'icon_type.required' => 'Bạn phải chọn loại icon.',
-            'icon_type.in'       => 'Loại icon không hợp lệ (chỉ cho phép class, image, svg).',
+    
             'item_title.required'=> 'Tiêu đề item là bắt buộc.',
             'item_title.max'     => 'Tiêu đề item không được vượt quá 255 ký tự.',
         ];

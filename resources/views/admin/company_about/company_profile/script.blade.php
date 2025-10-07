@@ -47,13 +47,13 @@
 
             // ===== Initial Values =====
             const initialFormValues = {
-                section_key: '{{ $profile->section_key ?? '' }}',
-                title: '{{ $profile->title ?? '' }}',
-                headline: '{{ $profile->headline ?? '' }}',
-                cta_label: '{{ $profile->cta_label ?? '' }}',
-                cta_link: '{{ $profile->cta_link ?? '' }}',
-                summary: '{{ $profile->summary ?? '' }}',
-                body: '{{ $profile->body ?? '' }}'
+                section_key: '{{ $profile->section_key }}',
+                title: '{{ $profile->title }}',
+                headline: '{{ $profile->headline }}',
+                cta_label: '{{ $profile->cta_label }}',
+                cta_link: '{{ $profile->cta_link }}',
+                summary: '{{ $profile->summary }}',
+                body: '{{ $profile->body }}'
             };
 
             const initialValues = {
@@ -100,7 +100,7 @@
                 const {
                     ok,
                     data
-                } = await fetchJson(`/admin/company_about/company_profile/remove-image/${profileId}`, {
+                } = await fetchJson(`/admin/company_about/profile/remove_image/${profileId}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
