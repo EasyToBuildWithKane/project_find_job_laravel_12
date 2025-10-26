@@ -1,70 +1,45 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\CompanyAbout\CompanyProfileController;
-use App\Http\Controllers\Admin\CompanyAbout\CompanyTeamMemberController;
-use App\Http\Controllers\Admin\CompanyAbout\WhyChooseUsController;
-
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\Frontend\CompanyProfileController;
+use App\Http\Controllers\API\Frontend\WhyChooseUsController;
+use App\Http\Controllers\API\Frontend\CompanyTeamMemberController;
+use App\Http\Controllers\API\Frontend\PricingPlanController;
 
 
-// ===== ADMIN / PROTECTED =====
-
-Route::middleware(['auth.session'])
+Route::prefix('v1/')
     ->group(function () {
-        // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'AdminDashboard'])
-            ->name('dashboard');
+        // ===== FRONTEND / PUBLIC =====
+        Route::prefix('frontend/')
+            ->group(function () {
 
-        // Admin profile & password
-        Route::controller(AdminController::class)->group(function () {
-            // Profile
-            Route::get('/profile', 'showProfile')->name('profile.show');
-            Route::post('/profile/store', 'updateProfile')->name('profile.update');
-            Route::post('/profile/remove-photo', 'removePhoto')->name('profile.remove-photo');
-            // Password
-            Route::get('/password/change', 'showChangePassword')->name('password.show');
-            Route::post('/update/password', 'updatePassword')->name('update.password');
-            // Logout
-            Route::get('/logouts', 'logout')->name('logouts');
+            Route::controller(CompanyProfileController::class)
+                ->group(function () {
+                    Route::get('company-profiles', 'index');
+
+                });
+            Route::controller(CompanyTeamMemberController::class)
+                ->group(function () {
+                    Route::get('company-team-member', 'index');
+
+                });
+            Route::controller(WhyChooseUsController::class)
+                ->group(function () {
+                    Route::get('why-choose-us', 'index');
+
+                });
+            Route::controller(PricingPlanController::class)
+                ->group(function () {
+                    Route::get('pricing-plan', 'index');
+
+                });
         });
 
-        // Admin Company About
-        // Company Profile
-        Route::controller(CompanyProfileController::class)
-            ->prefix('company_about/company_profile')
-            ->name('company_about.company_profile.')
-            ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
 
-        });
-        Route::controller(CompanyTeamMemberController::class)
-            ->prefix('company_about/company_team_member')
-            ->name('company_about.company_team_member.')
-            ->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::get('/{id}/edit', 'edit')->name('edit');
-                Route::put('/{id}', 'update')->name('update');
-                Route::post('/remove-image/{id}', 'removeImage')->name('remove_image');
-            });
 
-         Route::controller(WhyChooseUsController::class)
-            ->prefix('company_about/why_choose_us')
-            ->name('company_about.why_choose_us.')
-            ->group(function () {
-                Route::get('/', 'index')->name('index');         // danh sách
-                Route::get('/create', 'create')->name('create'); // form thêm
-                Route::post('/', 'store')->name('store');        // lưu thêm
-                Route::get('/{id}/edit', 'edit')->name('edit');  // form sửa
-                Route::put('/{id}', 'update')->name('update');   // lưu sửa
-                Route::delete('/{id}', 'destroy')->name('destroy'); // xóa
-                Route::post('/remove-icon/{id}', 'removeIcon')->name('remove_icon'); // xóa icon nếu cần
-            });
+
+
 
     });
-// Bao gồm routes auth mặc định
-require __DIR__ . '/auth.php';
+
+

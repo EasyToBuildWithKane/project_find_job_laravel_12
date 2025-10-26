@@ -4,41 +4,46 @@ namespace App\Http\Controllers\Admin\CompanyAbout;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CompanyAbout\CompanyProfile\UpdateRequest;
-use App\Models\CompanyProfile;
-use Exception;
+use App\Services\CompanyProfileService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
+use Throwable;
 
 class CompanyProfileController extends Controller
 {
+    protected CompanyProfileService $profileService;
+
+    public function __construct(CompanyProfileService $profileService)
+    {
+        $this->profileService = $profileService;
+    }
+
     /**
-     * Trang index + DataTables
+     * Danh sách Company Profile (DataTables AJAX hoặc view)
      */
     public function index()
     {
         if (request()->ajax()) {
-            $query = CompanyProfile::query();
+            $query = $this->profileService->getAllCompanyProfiles();
 
             return DataTables::of($query)
-                ->addColumn('action', function ($row) {
-                    $editUrl = route('admin.company_about.company_profile.edit', $row->id);
-                    return '
-                        <a href="' . $editUrl . '" class="btn btn-sm btn-primary">
-                            <i class="fas fa-edit"></i> Sửa
-                        </a>
-                    ';
-                })
-                ->editColumn('featured_image_url', function ($row) {
-                    if ($row->featured_image_url) {
-                        return '<img src="' . asset($row->featured_image_url) . '" style="height:40px;width:auto;">';
-                    }
-                    return '-';
+                ->addColumn('action', content: fn($row) =>
+                    sprintf(
+                        '<a href="%s" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</a>',
+                        route('admin.company_about.company_profile.edit', $row->id)
+                    )
+                )
+            ->editColumn('featured_image_url', function ($row) {
+                    $imageUrl = $row->featured_image_url
+                        ? asset($row->featured_image_url)
+                        : asset('uploads/no_image.jpg');
+
+                    return '<img src="' . e($imageUrl) . '" alt="Ảnh đại diện" 
+                class="img-thumbnail rounded-circle" 
+                style="height: 60px; width: 60px; object-fit: cover;">';
                 })
                 ->rawColumns(['action', 'featured_image_url'])
-
                 ->make(true);
         }
 
@@ -46,22 +51,21 @@ class CompanyProfileController extends Controller
     }
 
     /**
-     * Trang edit riêng
+     * Trang chỉnh sửa
      */
     public function edit(int $id)
     {
         try {
-            $profile = CompanyProfile::findOrFail($id);
+            $profile = $this->profileService->getById($id);
             return view('admin.company_about.company_profile.edit', compact('profile'));
-        } catch (Exception $e) {
-            Log::error('CompanyProfile edit error', [
+        } catch (Throwable $e) {
+            Log::error('CompanyProfile edit failed', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
             ]);
 
-            return redirect()->route('admin.company_about.company_profile.index')
+            return redirect()
+                ->route('admin.company_about.company_profile.index')
                 ->with('error', 'Không tìm thấy bản ghi hoặc có lỗi xảy ra.');
         }
     }
@@ -72,61 +76,44 @@ class CompanyProfileController extends Controller
     public function update(UpdateRequest $request, int $id)
     {
         try {
-            $profile = CompanyProfile::findOrFail($id);
-
-            DB::transaction(function () use ($request, $profile) {
-                $data = $request->validated();
-
-                if ($request->hasFile('featured_image_url') && $request->file('featured_image_url')->isValid()) {
-                    $file = $request->file('featured_image_url');
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('uploads/images'), $filename);
-                    $data['featured_image_url'] = 'uploads/images/' . $filename;
-                }
-
-                $profile->update($data);
-            });
+            $this->profileService->updateCompanyProfile($id, $request->validated());
 
             return redirect()
-            ->route('admin.company_about.company_profile.index')
-            ->with('success', 'Cập nhật thành công');
-
-
-        } catch (Exception $e) {
-            Log::error('CompanyProfile update error', [
+                ->route('admin.company_about.company_profile.index')
+                ->with('success', 'Cập nhật thành công.');
+        } catch (Throwable $e) {
+            Log::error('CompanyProfile update failed', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
         }
     }
 
+    /**
+     * Xóa ảnh CompanyProfile
+     */
     public function removeImage(int $id): JsonResponse
     {
         try {
-            $profile = CompanyProfile::findOrFail($id);
+            $this->profileService->removeImage($id);
 
-            if ($profile->featured_image_url && file_exists(public_path($profile->featured_image_url))) {
-                unlink(public_path($profile->featured_image_url));
-            }
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Ảnh đã được xoá thành công.',
+            ], 200);
 
-            $profile->featured_image_url = null;
-            $profile->save();
-
-            return response()->json(['message' => 'Ảnh đã được xoá'], 200);
-
-        } catch (Exception $e) {
-            Log::error('Remove CompanyProfile image error', [
+        } catch (Throwable $e) {
+            Log::error('Remove CompanyProfile image failed', [
                 'id' => $id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
-            return response()->json(['message' => 'Có lỗi xảy ra, vui lòng thử lại'], 500);
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Có lỗi xảy ra, vui lòng thử lại.',
+            ], 500);
         }
     }
-
-
 }

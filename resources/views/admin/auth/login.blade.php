@@ -61,7 +61,7 @@
                             </div>
                         </div>
 
-                        <div class="simple-footer text-center">&copy; KaneNguyen {{ now()->year }}</div>
+                        <div class="simple-footer text-center">&copy; MinhTu {{ now()->year }}</div>
                     </div>
                 </div>
             </div>

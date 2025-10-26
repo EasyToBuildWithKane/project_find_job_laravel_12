@@ -2,19 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class WhyChooseUs extends Model
 {
     use HasFactory;
 
-    protected $table = 'why_choose_us';
-
     protected $fillable = [
-        'section_title',
-        'section_subtitle',
-        'item_title',
-        'item_description',
+        'id',
+        'icon_one',
+        'title_one',
+        'sub_title_one',
+        'icon_two',
+        'title_two',
+        'sub_title_two',
+        'icon_three',
+        'title_three',
+        'sub_title_three',
     ];
 }

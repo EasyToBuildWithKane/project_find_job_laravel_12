@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->uuid('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
 
             $table->string('otp', 10);

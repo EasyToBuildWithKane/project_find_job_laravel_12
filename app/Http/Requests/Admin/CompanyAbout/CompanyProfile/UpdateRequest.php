@@ -28,11 +28,6 @@ class UpdateRequest extends FormRequest
                 'max:2048',
 
             ],
-            'title' => 'required|string|max:255',
-            'headline' => 'nullable|string|max:255',
-            'summary' => 'nullable|string|max:1000',
-            'body' => 'nullable|string',
-            'featured_image_url' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048', // 2MB
             'cta_label' => 'nullable|string|max:50',
             'cta_link' => 'nullable|url|max:255',
         ];

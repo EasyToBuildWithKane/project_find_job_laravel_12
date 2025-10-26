@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            // UUID làm primary key
-            $table->uuid('id')->primary();
+   
+            $table->id();
 
             $table->string('username', 100)->unique();
             $table->string('email', 150)->unique()->nullable();
@@ -53,24 +53,7 @@ return new class extends Migration {
             $table->string('avatar_url', 255)->nullable();
             $table->string('cover_image_url', 255)->nullable();
 
-            $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->nullable();
-            $table->timestamp('kyc_submitted_at')->nullable();
-
-            // Khóa ngoại cũng là UUID
-            $table->uuid('kyc_verified_by')->nullable();
-            $table->foreign('kyc_verified_by')->references('id')->on('users')->nullOnDelete();
-
-            $table->string('referral_code', 50)->nullable();
-            $table->uuid('referred_by')->nullable();
-            $table->foreign('referred_by')->references('id')->on('users')->nullOnDelete();
-
-            $table->boolean('marketing_opt_in')->default(false);
-            $table->timestamp('privacy_policy_accepted_at')->nullable();
-            $table->timestamp('terms_accepted_at')->nullable();
-            $table->timestamp('last_password_change_at')->nullable();
-
-            // =======================================
-
+    
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
@@ -88,7 +71,7 @@ return new class extends Migration {
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->uuid('user_id')->nullable()->index();
+            $table->integer('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

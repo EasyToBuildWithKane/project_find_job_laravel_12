@@ -47,13 +47,10 @@
 
             // ===== Initial Values =====
             const initialFormValues = {
-                full_name: '{{ $member->full_name ?? '' }}',
-                job_title: '{{ $member->job_title ?? '' }}',
-                department: '{{ $member->department ?? '' }}',
-                location: '{{ $member->location ?? '' }}',
-                rating: '{{ $member->rating ?? 5 }}',
-                review_count: '{{ $member->review_count ?? 0 }}',
-                display_order: '{{ $member->display_order ?? 0 }}',
+                full_name: '{{ $member->full_name }}',
+                job_title: '{{ $member->job_title }}',
+                department: '{{ $member->department }}',
+                location: '{{ $member->location }}',
                 is_featured: '{{ $member->is_featured ?? 0 }}'
             };
 
@@ -102,7 +99,7 @@
                     ok,
                     data
                 } = await fetchJson(
-                `/admin/company_about/company_team_member/remove-image/${memberId}`, {
+                `/admin/company_about/team_member/remove_image/${memberId}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,

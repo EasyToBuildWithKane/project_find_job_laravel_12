@@ -4,29 +4,39 @@ namespace App\Http\Controllers\Admin\CompanyAbout;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CompanyAbout\WhyChooseUsRequest;
-use App\Models\WhyChooseUs;
+use App\Services\WhyChooseUsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Yajra\DataTables\Facades\DataTables;
 use Throwable;
+use Yajra\DataTables\Facades\DataTables;
 
 class WhyChooseUsController extends Controller
 {
+    protected WhyChooseUsService $whyChooseUsService;
+
+    public function __construct(WhyChooseUsService $whyChooseUsService)
+    {
+        $this->whyChooseUsService = $whyChooseUsService;
+    }
+
     /**
      * Trang index + DataTables
      */
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = WhyChooseUs::query()->orderBy('id', 'asc');
+            $query = $this->whyChooseUsService->getAllWhyChooseUs();
 
             return DataTables::of($query)
                 ->addColumn('action', function ($row) {
                     $editUrl = route('admin.company_about.why_choose_us.edit', $row->id);
-                    return '<a href="' . $editUrl . '" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i> Sửa
-                            </a>';
+                    return sprintf(
+                        '<a href="%s" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</a>',
+                        e($editUrl)
+                    );
                 })
+                ->editColumn('title', fn($row) => e($row->title))
                 ->rawColumns(['action'])
                 ->make(true);
         }
@@ -40,33 +50,33 @@ class WhyChooseUsController extends Controller
     public function edit(int $id)
     {
         try {
-            $item = WhyChooseUs::findOrFail($id);
+            $item = $this->whyChooseUsService->getById($id);
             return view('admin.company_about.why_choose_us.edit', compact('item'));
         } catch (Throwable $e) {
             Log::error('WhyChooseUs edit error', [
                 'id' => $id,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
-            return redirect()->route('admin.company_about.why_choose_us.index')
-                ->with('error', 'Không tìm thấy item hoặc có lỗi xảy ra.');
+            return redirect()
+                ->route('admin.company_about.why_choose_us.index')
+                ->with('error', 'Không tìm thấy dữ liệu hoặc có lỗi xảy ra.');
         }
     }
 
     /**
-     * Cập nhật thông tin
+     * Cập nhật thông tin WhyChooseUs
      */
-    public function update(Request $request, int $id)
+    public function update(WhyChooseUsRequest $request, int $id)
     {
         try {
-            $item = WhyChooseUs::findOrFail($id);
-            $data = $request->except('_token');
-
-            $item->update($data);
+            $this->whyChooseUsService->updateWhyChooseUs($id, $request->validated());
 
             return redirect()
                 ->route('admin.company_about.why_choose_us.index')
-                ->with('success', 'Cập nhật thành công');
+                ->with('success', 'Cập nhật thông tin thành công.');
         } catch (Throwable $e) {
             Log::error('WhyChooseUs update error', [
                 'id' => $id,
@@ -74,7 +84,10 @@ class WhyChooseUsController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Có lỗi xảy ra, vui lòng thử lại.');
         }
     }
 }

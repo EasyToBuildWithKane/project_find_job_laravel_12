@@ -1,64 +1,64 @@
 @extends('admin.layouts.master')
-@section('module', 'Admin')
-@section('action', 'Change Password')
+@section('module', 'Quản trị')
+@section('action', 'Đổi Mật Khẩu')
 
 @section('admin-content')
 
-    <h2 class="section-title">Hello, {{ Auth::user()->name }}!</h2>
+    <h2 class="section-title">Xin chào, {{ Auth::user()->name }}!</h2>
     <p class="section-lead">
-        You can update your personal password here.
+        Bạn có thể cập nhật mật khẩu cá nhân tại đây.
     </p>
 
-    <div class="row mt-sm-4">
-        <div class="col-12 col-md-12 col-lg-12">
-            <div class="card">
-                <form id="change-password-form" action="{{ route('admin.update.password') }}" method="POST"
+    <div class="row mt-sm-4 justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <form id="change-password-form" action="{{ route('admin.password.update') }}" method="POST"
                     class="needs-validation" novalidate>
                     @csrf
-                    <div class="card-header">
-                        <h4>Edit Password</h4>
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Cập Nhật Mật Khẩu</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
 
-                            <!-- Current Password -->
-                            <div class="form-group col-md-12 col-12 position-relative">
-                                <label>Current Password</label>
-                                <input type="password" name="old_password"
+                            <!-- Mật khẩu hiện tại -->
+                            <div class="form-group col-12 position-relative mb-3">
+                                <label for="old_password">Mật khẩu hiện tại</label>
+                                <input type="password" name="old_password" id="old_password"
                                     class="form-control @error('old_password') is-invalid @enderror" required
-                                    placeholder="Enter your current password">
+                                    placeholder="Nhập mật khẩu hiện tại">
                                 <i class="fas fa-eye toggle-password"
                                     style="position:absolute; top:38px; right:15px; cursor:pointer;"></i>
-                                <div class="invalid-feedback">Please enter your current password.</div>
+                                <div class="invalid-feedback">Vui lòng nhập mật khẩu hiện tại.</div>
                                 @error('old_password')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- New Password -->
-                            <div class="form-group col-md-12 col-12 position-relative">
-                                <label>New Password</label>
+                            <!-- Mật khẩu mới -->
+                            <div class="form-group col-12 position-relative mb-3">
+                                <label for="new_password">Mật khẩu mới</label>
                                 <input type="password" name="new_password" id="new_password"
                                     class="form-control @error('new_password') is-invalid @enderror" required
-                                    placeholder="Enter your new password">
+                                    placeholder="Nhập mật khẩu mới">
                                 <i class="fas fa-eye toggle-password"
                                     style="position:absolute; top:38px; right:15px; cursor:pointer;"></i>
-                                <div class="invalid-feedback">Please enter a new password.</div>
+                                <div class="invalid-feedback">Vui lòng nhập mật khẩu mới.</div>
                                 @error('new_password')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 <small id="passwordStrength" class="form-text text-muted mt-1"></small>
                             </div>
 
-                            <!-- Confirm New Password -->
-                            <div class="form-group col-md-12 col-12 position-relative">
-                                <label>Confirm New Password</label>
-                                <input type="password" name="new_password_confirmation"
+                            <!-- Xác nhận mật khẩu mới -->
+                            <div class="form-group col-12 position-relative mb-3">
+                                <label for="new_password_confirmation">Xác nhận mật khẩu mới</label>
+                                <input type="password" name="new_password_confirmation" id="new_password_confirmation"
                                     class="form-control @error('new_password_confirmation') is-invalid @enderror" required
-                                    placeholder="Re-enter your new password">
+                                    placeholder="Nhập lại mật khẩu mới">
                                 <i class="fas fa-eye toggle-password"
                                     style="position:absolute; top:38px; right:15px; cursor:pointer;"></i>
-                                <div class="invalid-feedback">Please confirm your new password.</div>
+                                <div class="invalid-feedback">Vui lòng xác nhận mật khẩu mới.</div>
                                 @error('new_password_confirmation')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -66,8 +66,8 @@
 
                         </div>
                     </div>
-                    <div class="card-footer text-right">
-                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
+                    <div class="card-footer text-end bg-light">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">Lưu thay đổi</button>
                     </div>
                 </form>
             </div>
@@ -77,109 +77,108 @@
 @endsection
 
 @push('scripts')
-    <script>
-        $(document).ready(function() {
+<script>
+$(document).ready(function() {
 
-            const form = $('#change-password-form');
-            const btn = $('#saveBtn');
-            const strengthText = $('#passwordStrength');
+    const form = $('#change-password-form');
+    const btn = $('#saveBtn');
+    const strengthText = $('#passwordStrength');
 
-            // Password strength meter
-            $('#new_password').on('input', function() {
-                const val = $(this).val();
-                let strength = 'Weak';
-                let color = 'text-danger';
+    // Đo độ mạnh mật khẩu
+    $('#new_password').on('input', function() {
+        const val = $(this).val();
+        let strength = 'Yếu';
+        let color = 'text-danger';
 
-                if (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[!@#$%^&*]/.test(val)) {
-                    strength = 'Strong';
-                    color = 'text-success';
-                } else if (val.length >= 6) {
-                    strength = 'Medium';
-                    color = 'text-warning';
-                }
+        if (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[!@#$%^&*]/.test(val)) {
+            strength = 'Mạnh';
+            color = 'text-success';
+        } else if (val.length >= 6) {
+            strength = 'Trung bình';
+            color = 'text-warning';
+        }
 
-                strengthText.text('Strength: ' + strength)
-                    .removeClass('text-danger text-warning text-success')
-                    .addClass(color);
+        strengthText.text('Độ mạnh: ' + strength)
+            .removeClass('text-danger text-warning text-success')
+            .addClass(color);
+    });
+
+    // Hiển thị/ẩn mật khẩu
+    $('.toggle-password').on('click', function() {
+        const input = $(this).siblings('input');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    // Xử lý submit form
+    form.on('submit', function(e) {
+        e.preventDefault();
+
+        const oldPass = form.find('[name="old_password"]').val().trim();
+        const newPass = form.find('[name="new_password"]').val().trim();
+        const confirmPass = form.find('[name="new_password_confirmation"]').val().trim();
+
+        // Kiểm tra client-side
+        if (!oldPass || !newPass || !confirmPass) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng điền đầy đủ các trường mật khẩu.'
             });
+            return;
+        }
 
-            // Toggle show/hide password
-            $('.toggle-password').on('click', function() {
-                const input = $(this).siblings('input');
-                if (input.attr('type') === 'password') {
-                    input.attr('type', 'text');
-                    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+        if (newPass !== confirmPass) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Mật khẩu không khớp',
+                text: 'Mật khẩu mới và xác nhận mật khẩu không trùng nhau.'
+            });
+            return;
+        }
+
+        btn.prop('disabled', true).text('Đang xử lý...');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: res.message,
+                        confirmButtonText: 'OK'
+                    }).then(() => window.location.href = '/login');
                 } else {
-                    input.attr('type', 'password');
-                    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
-                }
-            });
-
-            // Form submit
-            form.on('submit', function(e) {
-                e.preventDefault();
-
-                const oldPass = form.find('[name="old_password"]').val().trim();
-                const newPass = form.find('[name="new_password"]').val().trim();
-                const confirmPass = form.find('[name="new_password_confirmation"]').val().trim();
-
-                // Client-side validation
-                if (!oldPass || !newPass || !confirmPass) {
                     Swal.fire({
-                        icon: 'warning',
-                        title: 'Missing Information',
-                        text: 'Please fill all password fields.'
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: res.message || 'Không thể đổi mật khẩu.'
                     });
-                    return;
                 }
-
-                if (newPass !== confirmPass) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Password Mismatch',
-                        text: 'New password and confirmation do not match.'
-                    });
-                    return;
-                }
-
-                btn.prop('disabled', true).text('Processing...');
-
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: form.serialize(),
-                    success: function(res) {
-                        if (res.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: res.message,
-                                confirmButtonText: 'OK'
-                            }).then(() => window.location.href = '/login');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: res.message || 'Unable to change password.'
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        let msg = 'An error occurred, please try again.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON
-                            .message;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: msg
-                        });
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('Save Changes');
-                    }
+            },
+            error: function(xhr) {
+                let msg = 'Có lỗi xảy ra, vui lòng thử lại.';
+                if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: msg
                 });
-            });
-
+            },
+            complete: function() {
+                btn.prop('disabled', false).text('Lưu thay đổi');
+            }
         });
-    </script>
+    });
+
+});
+</script>
 @endpush

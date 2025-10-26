@@ -4,8 +4,8 @@ use App\Http\Middleware\AdminRoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,34 +14,46 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
+            // --- Admin routes ---
             Route::middleware(['web', 'auth', 'role:admin'])
                 ->prefix('admin')
                 ->name('admin.')
-                ->group(function () {
-                    require base_path('routes/admin.php');
-                });
-
+                ->group(base_path('routes/admin.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Global middleware
+        /**
+         *  Global Middleware
+         * Dành cho mọi request (CORS, maintenance, trusted proxies,...)
+         */
         $middleware->prepend(HandleCors::class);
 
-        // Aliases
+        /**
+         * Middleware Aliases
+         * Có thể gọi bằng tên ngắn gọn trong route
+         */
         $middleware->alias([
             'role' => AdminRoleMiddleware::class,
         ]);
 
-        // Group-level middleware
+        /**
+         * API Middleware Group
+         * Dành cho API có authentication/stateful session
+         */
         $middleware->appendToGroup('api', [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
     })
     ->withProviders([
-
+        // Đặt service provider custom
     ])
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->renderable(function (Throwable $e, $request) {
+        /**
+         * Exception Handling
+         * - Dùng chung cho tất cả request (Web + API)
+         * - Ẩn thông tin nhạy cảm trên production
+         */
+         $exceptions->renderable(function (Throwable $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => $e->getMessage(),
@@ -50,6 +62,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->booted(function () {
-
+        /**
+         * Đặt logic sau khi app khởi động (VD: logging custom, event boot,...)
+         */
     })
     ->create();
