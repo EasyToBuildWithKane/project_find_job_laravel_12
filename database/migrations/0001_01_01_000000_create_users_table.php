@@ -11,8 +11,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->uuid('uuid')->unique()->comment('Public identifier');
+   
+            $table->id();
+
             $table->string('username', 100)->unique();
             $table->string('email', 150)->unique()->nullable();
             $table->string('phone', 20)->unique()->nullable();
@@ -32,14 +33,35 @@ return new class extends Migration {
             $table->unsignedTinyInteger('failed_login_attempts')->default(0);
             $table->timestamp('last_failed_login_at')->nullable();
 
+            // ========== Thông tin cá nhân ==========
+            $table->string('first_name', 100)->nullable();
+            $table->string('last_name', 100)->nullable();
+            $table->string('full_name', 200)->nullable()->index();
+            $table->date('dob')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+
+            $table->string('address_line', 150)->nullable();
+            $table->string('link_social', 150)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('state', 100)->nullable();
+            $table->string('postal_code', 20)->nullable();
+            $table->string('country_code', 10)->nullable();
+
+            $table->string('timezone', 50)->nullable();
+            $table->string('language', 10)->default('en');
+
+            $table->string('avatar_url', 255)->nullable();
+            $table->string('cover_image_url', 255)->nullable();
+
+    
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
 
+            // Indexes
             $table->index(['email', 'phone']);
             $table->index(['last_login_at']);
         });
-
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -49,7 +71,7 @@ return new class extends Migration {
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->integer('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

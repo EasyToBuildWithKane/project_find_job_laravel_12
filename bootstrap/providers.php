@@ -8,4 +8,6 @@ return [
     Maatwebsite\Excel\ExcelServiceProvider::class,
     Yajra\DataTables\ButtonsServiceProvider::class,
     Yajra\DataTables\DataTablesServiceProvider::class,
+    App\Providers\QueryLogServiceProvider::class,
+    App\Providers\RateLimitServiceProvider::class,
 ];
